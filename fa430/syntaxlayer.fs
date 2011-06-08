@@ -46,6 +46,14 @@ $33 value mode#
 : R14 14 m1 ; 
 : R15 15 m1 ; 
 
+\ for camelforth test 
+' R1 alias RSP \ retur stack pointer
+' R4 alias PSP \ parameter stack pointer
+' R5 alias IP  \ instruction pointer
+' R6 alias W   \ working register
+' R7 alias TOS \ top of (parameter) stack
+
+
 \ 2. mode for all registers 
 : (R0) 0 m2 ;     ' (R0) alias (PC)  \ program counter 
 : (R1) 1 m2 ;     ' (R1) alias (SP)  \ stack ponter 
@@ -169,5 +177,4 @@ $33 value mode#
  ' BIS.W     alias BIS   
  ' XOR.W     alias XOR   
  ' AND.W     alias AND   
-
 
