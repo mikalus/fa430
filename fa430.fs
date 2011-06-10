@@ -1,13 +1,13 @@
 \ FORTH Assembler for TI MSP430x2xx Family                    
-\ v05.001  mk 20110608 syntaxlayer hinzugefŸgt.
-\ v04.001  mk 20110527
-\ v03.002+ mk 20110504
-\ v00.001  mk 20110424 
 
 \ Made with gforth 0-7-0 on MacOSX 10.4.11 PowerPC G4.
 
 
-\ 
+0 [if] Todo: 
+-- verification of op codes.
+-- syntaxlayers.
+-- emulated opcodes.
+[then]
 \ 
 \ Information: 
 \ This simple Assembler is for Texas Instruments MSP430 Microcomputers.
@@ -16,7 +16,10 @@
 \ SLAU144HâDecember 2004âRevised April 2011, S. 64, CPU. 
 \ © 2004â2011, Texas Instruments Incorporated 
 \ 
-\ *** Syntax 
+\ Autor:          Michael Kalus (mk) 
+
+
+\ *** basic syntax 
 \ Adressmode modifying words follow an item.
 \ Mnemonic Opcode Words compile the Instruktion.
 \ Assembler         Forth Assembler
@@ -24,7 +27,6 @@
 \ AND #0AA55h,TOM   $0AA55 #N TOM ADDR AND,  
 \ 
 \ 
-\ Autor:          Michael Kalus (mk) 
 
 : .. bye ; 
 : %% 2 base ! ; 
@@ -340,8 +342,9 @@ $1240 .B mneII: PUSH.B,  ( src -- )   \ Push source onto stack:  SP - 2 --> SP, 
 : s>10 ( n -- n10 ) \ convert single precission to 10bit 2-complement. 
     dup %1111111111 and swap 0< if %1000000000 or then ; 
 
-: offsetIII ( label -- 10bit-pc-offset )  here - 2/ 1- s>10 ; 
-: formatIII ( label op -- )  mode or  swap offsetIII or  op, ; 
+: offsetIIIforward ( adr -- ) herem swap - 2/ 1- s>10 ; 
+: offsetIIIback ( label -- 10bit-pc-offset )  herem - 2/ 1- s>10 ; 
+: formatIII ( label op -- )  mode or  swap offsetIIIback or  op, ; 
 : mneIII: ( opcode "name" -- ) create ,   does>  ( adr -- op ) @ formatIII  ;  
 
 $2000 mneIII: JNE, ( adr -- )   \ Jump if not equal/Jump if Z not set [ - - - - ] 
@@ -362,6 +365,28 @@ $3C00 mneIII: JMP, ( adr -- )   \ Jump PC + 2 * offset --> PC [ - - - - ]
 
 \ *** Assembler facilities 
 
+\ -- label tabel
+&10 constant maxlabels 
+variable (lbl) maxlabels cells allot  
+: >label    ( n -- )  herem swap cell * (lbl) + ! ; 
+: label>    ( n -- addr )  cell * (lbl) + @ ;
+: .labels   ( -- )   ." labels" cr maxlabels 0 do i . i label> . cr loop ; 
+: clrlabels ( -- )   maxlabels 0 do i >label loop ; 
+
+\ -- solve forward jump 
+\ (f jxx,  ...  f) 
+: (f  ( -- adr mark herem ) herem $1122 over 2 + ; 
+: f)  ( adr mark -- ) 
+  $1122 = if >r  r@ offsetIIIforward  r@ w@m  or  r> w!m   
+          else c" expected (f " c(abort") then ; 
+
+\ -- solve backward jump 
+\ (b  ....  b) jxx, 
+: (b  ( -- adr mark) herem $3344 ; 
+: b)  ( adr mark -- )  $3344 = if else c" expected b) " c(abort") then ; 
+
+
+\ *** for verification purpose only 
 \ list a compiled instruction. 
 : .lst ( -- ) 
     lop hex. 
@@ -381,37 +406,8 @@ $3C00 mneIII: JMP, ( adr -- )   \ Jump PC + 2 * offset --> PC [ - - - - ]
     cr ." dump code area" startMSP  endadr   dump ; 
 
 
-\ Handling of labels adopted from Lubos Pekny code. 
-\   AvrAsm - assembler Atmega chips, Lubos Pekny, www.forth.cz
-\   Library for amforth 3.0 mFC 1.0
-\   V.1.1v, 29.01.2009.
 
-  \ Address for jump back. Example: 
-: <adr     ( adr -- k )
-    herem 1+ - ;
-
-&10 constant maxlabels 
-variable (lbl) maxlabels cells allot  \ RAM for 10 labels
-
-' herem alias lbl> 
-
-  \ store addr to vector of labels
-: >lbl ( addr c -- )  \ index c=0..9
-    cell * (lbl) + ! ; 
-
-  \ read addr from vector of labels
-: <lbl ( c -- addr )  \ index c=0..9
-    cell * (lbl) + @ ;
-
-: lbl? ( -- ) \ list labels
-  ." list labels" cr maxlabels 0 do i . i <lbl . cr loop ; 
-
-: clrlbl ( -- ) \ clear label tabel
-  maxlabels 0 do 0 i >lbl loop ; 
-
-
-
-include syntaxlayer.fs 
+\ include syntaxlayer.fs ( secondary syntax layer to ease coding) 
 \ include emuset.fs 
 
 
@@ -419,6 +415,5 @@ include syntaxlayer.fs
 
 hex
 
-.( - words so far: ) words cr 
-.( - end of wordlist) cr cr 
+\ .( -- words so far: ) words cr  .( -- end of wordlist) cr cr 
 \ finis 
