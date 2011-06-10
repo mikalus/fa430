@@ -116,6 +116,10 @@ $33 value mode#
 \ 7. mode 
   ' m7 alias #N ( n -- n ) 
 
+
+
+\ *** Double-Operand Instructions (Format I) 
+
 : smode# ( -- n )  mode# 4 rshift $F and ; 
 : smodeI ( src | x src -- )
     smode# 
@@ -136,8 +140,6 @@ $33 value mode#
     dup 4 = if drop d&ADDR  exit then 
     1 throw ;
 
-
-\ Double-Operand (Format I) Instructions 
 \ expression ex may be single or doubble item. res
  : MOV.W  ( ex1 ex2  -- ) dmodeI smodeI     mov.w,  reset-mode# ; 
  : ADD.W  ( ex1 ex2  -- ) dmodeI smodeI     add.w,  reset-mode# ; 
@@ -175,6 +177,57 @@ $33 value mode#
  ' BIT.W     alias BIT   
  ' BIC.W     alias BIC   
  ' BIS.W     alias BIS   
- ' XOR.W     alias XOR   
- ' AND.W     alias AND   
+\ ' XOR.W     alias XOR   
+\ ' AND.W     alias AND   
 
+
+
+\ Single-Operand INstructions ( Format II ) 
+
+: modeII ( src | x src -- )
+    mode# $F and 
+    dup 1 = if drop Rn     exit then 
+    dup 2 = if drop x(Rn)  exit then 
+    dup 3 = if drop ADDR   exit then 
+    dup 4 = if drop &ADDR  exit then 
+    dup 5 = if drop @Rn    exit then 
+    dup 6 = if drop @Rn+   exit then 
+    dup 7 = if drop #K     exit then 
+    1 throw ; 
+
+: RRC.W   ( ex -- ) modeII RRC.W,  reset-mode# ; 
+: SWPB    ( ex -- ) modeII SWPB,   reset-mode# ; 
+: RRA.W   ( ex -- ) modeII RRA.W,  reset-mode# ; 
+: SXT     ( ex -- ) modeII SXT,    reset-mode# ; 
+: PUSH.W  ( ex -- ) modeII PUSH.W, reset-mode# ; 
+: CALL    ( ex -- ) modeII CALL,   reset-mode# ; 
+' RETI, alias RETI
+
+: RRC.B   ( ex -- ) modeII RRC.B,  reset-mode# ; 
+: RRA.B   ( ex -- ) modeII RRA.B,  reset-mode# ; 
+: PUSH.B  ( ex -- ) modeII PUSH.B, reset-mode# ; 
+
+ ' RRC.W  alias RRC 
+ ' RRA.W  alias RRA 
+ ' PUSH.W alias PUSH
+ ' RETI   alias RET 
+
+
+
+\ *** Jump Instructions ( FormatIII ) 
+' JNE, ( adr -- )  alias JNE
+' JEQ, ( adr -- )  alias JEQ
+' JNC, ( adr -- )  alias JNC
+' JC,  ( adr -- )  alias JC
+' JN,  ( adr -- )  alias JN
+' JGE, ( adr -- )  alias JGE
+' JL,  ( adr -- )  alias JL
+' JMP, ( adr -- )  alias JMP
+
+  ' JNE, alias JNZ 
+  ' JEQ, alias JZ 
+  ' JNC, alias JLO 
+  ' JC,  alias JHS 
+
+
+ 
