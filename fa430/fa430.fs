@@ -68,21 +68,29 @@ little-endian
 :  w.m  { w -- }        w $00FF and 8 lshift  w $FF00 and 8 rshift or hex. ; 
 [then]
 
-0 value lop \ last opcode address. 
-:  [op]  ( -- ) herem to lop ; 
-:  op@ ( -- op ) lop w@m ; 
-:  op! ( op -- ) lop w!m ; 
-
+ 0 value lop \ last opcode address. 
  0 value mode \ addressmode mask 
  0 value src  \ source 
  0 value dst  \ destination 
+
 false value srcflag 
 false value dstflag 
+
 : reset-mode  0 to mode ; 
 : reset-src  false to srcflag ; 
 : reset-dst  false to dstflag ; 
+
 : set-src  true to srcflag ; 
 : set-dst  true to dstflag ; 
+
+: ?src,  ( -- ) srcflag if src w,m then reset-src ; 
+: ?dst,  ( -- ) dstflag if dst w,m then reset-dst ; 
+
+: [op]  ( -- ) herem to lop ; 
+: op@ ( -- op ) lop w@m ; 
+: op! ( op -- ) lop w!m ; 
+: op,    ( op -- ) [op] w,m reset-mode ; 
+
 
 
 
@@ -215,10 +223,6 @@ false value dstflag
 : .W ( op -- op.W ) %1111111110111111 and ; 
 : .B ( op -- op.B ) %0000000001000000 or  ; 
 
-: op,    ( op -- ) [op] w,m reset-mode ; 
-: ?src,  ( -- ) srcflag if src w,m then reset-src ; 
-: ?dst,  ( -- ) dstflag if dst w,m then reset-dst ; 
-
 \ Core Instruction Set 
 
 \ Double-Operand (Format I) Instructions 
@@ -308,7 +312,9 @@ $1100 .W mneII: RRA.W,   ( src -- )   \ Rotate right arithmetically [ 0 * * * ]
 $1180 .W mneII: SXT,     ( src -- )   \ Extend sign [ 0 * * * ] 
 $1200 .W mneII: PUSH.W,  ( src -- )   \ Push source onto stack:  SP - 2 --> SP, src --> @SP [ - - - - ] 
 $1280 .W mneII: CALL,    ( src -- )   \ Call destination:  PC+2 --> stack, dst --> PC [ - - - - ] 
-$1300 .W mneII: RETI,    ( -- )       \ Return from subroutine:  @SP --> PC, SP + 2 --> SP [ - - - - ] 
+\ $1300 .W mneII: RETI,    ( -- )       \ Return from subroutine:  @SP --> PC, SP + 2 --> SP [ - - - - ] 
+: RETI,    ( -- )  $1300 op, ;      \ Return from subroutine:  @SP --> PC, SP + 2 --> SP [ - - - - ] 
+
 
 $1040 .B mneII: RRC.B,   ( src -- )   \ Rotate right through C [ * * * * ] 
 $1140 .B mneII: RRA.B,   ( src -- )   \ Rotate right arithmetically [ 0 * * * ] 
