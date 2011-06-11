@@ -136,6 +136,26 @@ cr
   (  152    000140 B245....     MOV @R5+,&LABELm ; ) 5 s@rn+ labelm d&addr MOV, .lst
   (  153    000144 92450001.... MOV 0x100(R5 ,&LABELm ; ) 100 5 sx(rn) labelm d&addr MOV, .lst
 cr
+cr ( CG1 and CG2 test with mov instruction.)
+  (  157    00014A 0543         MOV #0,r5 ; ) 0#  5 dRn mov, .lst 
+  (   158    00014C 1543         MOV #1,r5 ; ) 1#  5 dRn mov, .lst 
+  (   159    00014E 2543         MOV #2,r5 ; ) 2#  5 dRn mov, .lst 
+  (   160    000150 2542         MOV #4,r5 ; ) 4#  5 dRn mov, .lst 
+  (   161    000152 3542         MOV #8,r5 ; ) 8#  5 dRn mov, .lst 
+  (   162    000154 3543         MOV #0xFFFF,r5 ; ) ffff#  5 dRn mov, .lst
+cr
+  (   164    000156 0543         MOV #0,r5 ; ) 0 s#k  5 dRn mov, .lst 
+  (   165    000158 1543         MOV #1,r5 ; ) 1 s#k  5 dRn mov, .lst 
+  (   166    00015A 2543         MOV #2,r5 ; ) 2 s#k  5 dRn mov, .lst 
+  (   167    00015C 35400300     MOV #3,r5 ; ) 3 s#k  5 dRn mov, .lst 
+  (   168    000160 2542         MOV #4,r5 ; ) 4 s#k  5 dRn mov, .lst 
+  (   169    000162 35400500     MOV #5,r5 ; ) 5 s#k  5 dRn mov, .lst 
+  (   170    000166 35400600     MOV #6,r5 ; ) 6 s#k  5 dRn mov, .lst 
+  (   171    00016A 35400700     MOV #7,r5 ; ) 7 s#k  5 dRn mov, .lst 
+  (   172    00016E 3542         MOV #8,r5 ; ) 8 s#k  5 dRn mov, .lst 
+  (   173    000170 35400900     MOV #9,r5 ; ) 9 s#k  5 dRn mov, .lst 
+  (   174    000174 3543         MOV #0xFFFF,r5 ; ) $FFFF s#k  5 dRn mov, .lst
+cr
 
 cr .endcode
 
