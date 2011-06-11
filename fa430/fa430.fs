@@ -5,8 +5,6 @@
 
 0 [if] Todo: 
 -- verification of op codes.
--- syntaxlayers.
--- emulated opcodes.
 [then]
 \ 
 \ Information: 
