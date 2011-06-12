@@ -160,7 +160,7 @@ false value dstflag
 \ The word following the instruction contains the immediate constant N. 
 \ Indirect autoincrement mode @PC+ is used. 
 : s#K   ( k -- ) ( PC) 0 >sreg  to src set-src   11As ; 
-:  #K   ( k -- ) ( PC) 0 >dreg  to src set-src   1Ad ; 
+:  #K   ( k -- ) ( PC) 0 >dreg  to src set-src   11As ; 
 
 0 [if] \ Constant Generator Comment
   One word less is compiled if CG1 or CG2 can be used as constant.
