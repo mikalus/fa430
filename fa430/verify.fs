@@ -47,7 +47,7 @@ cr
    (  62    000054 7512         PUSH.B @R5+ ; ) 5 @rn+ PUSH.B, .lst
    (  63    000056 55120001     PUSH.B 0x100(R5 ; ) 100 5 x(rn) PUSH.B, .lst
 cr
-   (  65    00005A 3041         RET ; ) ( no addressmodes) RET, .lst
+   (  65    00005A 0013         RETI ; ) RETI, .lst
 cr                                    
    (  67    00005C              ; RRA #EXEC ; ) \ exec #k RRA, .lst
    (  68    00005C 1011BAFF     RRA EXEC ; ) exec addr RRA, .lst
