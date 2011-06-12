@@ -391,11 +391,18 @@ variable (lbl) maxlabels cells allot
 
 
 \ *** for verification purpose only 
-\ list a compiled instruction. 
-: .lst ( -- ) 
-    lop hex. 
-    herem lop - 0  ?do lop i + w@m w.m 2 +loop 
-    ."   " source type .s cr ; 
+
+: (.lst) ( adr n  -- adr n ) \ list a compiled instruction. 
+    cr source type 3 spaces lop hex.  
+    herem lop - 0  ?do lop i + w@m w.m 2 +loop  ; 
+: .lst   ( adr n  -- )  2drop (.lst) .s ; 
+
+variable nops
+: $op  ( adr n -- ) drop &14 + 4 evaluate ; 
+:  w@mbe  { adr -- w }    adr c@m 8 lshift     adr 1+ c@m + ; \ big endian. 
+: ops? ( adr n -- ) $op lop w@mbe = ; 
+: .chk ( adr n -- )  \ check compiled instruktion. 
+    (.lst) ops? if .s ." Vop " else .s ." <--- Nop " 1 nops +! then ;
 
 0 value startadr 
 0 value endadr 
@@ -409,6 +416,8 @@ variable (lbl) maxlabels cells allot
 : .dumpcode-all ( -- ) 
     cr ." dump code area" startMSP  endadr   dump ; 
 
+: verification ( -- ) cr .startcode  clrlabels  0 nops ! ; 
+: .result ( -- ) cr nops @ . ." non matching opcodes" ; 
 
 
 \ include syntaxlayer.fs ( secondary syntax layer to ease coding) 
