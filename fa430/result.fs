@@ -27,7 +27,7 @@ herem=$0
 format-II instructions
 
   s"  40    000018               EXEC:     ; "                         .lst   $16 $F42F <0> 
-  s"  41    000018 B012....     CALL #EXEC ; "    exec #k CALL,        .chk   $18 $8012 $1800 <0> <--- Nop 
+  s"  41    000018 B012....     CALL #EXEC ; "    exec #k CALL,        .chk   $18 $B012 $1800 <0> Vop 
   s"  42    00001C 9012FAFF     CALL EXEC ; "    exec addr CALL,       .chk   $1C $9012 $FAFF <0> Vop 
   s"  43    000020 9212....     CALL &EXEC ; "    exec &addr CALL,     .chk   $20 $9212 $1800 <0> Vop 
   s"  44    000024 8512         CALL R5 ; "    5 rn CALL,              .chk   $24 $8512 <0> Vop 
@@ -36,7 +36,7 @@ format-II instructions
   s"  47    00002A 95120001     CALL 0x100(R5) ; " 100 5 x(rn) CALL,   .chk   $2A $9512 $1 <0> Vop 
 
   s"  48    00002E              ; "                                    .lst   $2A $9512 $1 <0> 
-  s"  49    00002E 3012....     PUSH #EXEC ; "    exec #k PUSH,        .chk   $2E $8012 $1800 <0> <--- Nop 
+  s"  49    00002E 3012....     PUSH #EXEC ; "    exec #k PUSH,        .chk   $2E $3012 $1800 <0> Vop 
   s"  50    000032 1012E4FF     PUSH EXEC ; "    exec addr PUSH,       .chk   $32 $1012 $E4FF <0> Vop 
   s"  51    000036 1212....     PUSH &EXEC ; "    exec &addr PUSH,     .chk   $36 $1212 $1800 <0> Vop 
   s"  52    00003A 0512         PUSH R5 ; "    5 rn PUSH,              .chk   $3A $512 <0> Vop 
@@ -44,7 +44,7 @@ format-II instructions
   s"  54    00003E 3512         PUSH @R5+ ; "    5 @rn+ PUSH,          .chk   $3E $3512 <0> Vop 
   s"  55    000040 15120001     PUSH 0x100(R5) ; " 100 5 x(rn) PUSH,   .chk   $40 $1512 $1 <0> Vop 
 
-  s"  57    000044 70120B00     PUSH.B #11 ; "    11 #k PUSH,              .chk   $44 $8012 $1100 <0> <--- Nop 
+  s"  57    000044 70120B00     PUSH.B #11 ; "   &11 #k PUSH.B,              .chk   $44 $7012 $B00 <0> Vop 
   s"  58    000048 5012CEFF     PUSH.B EXEC ; "    exec addr PUSH.B,       .chk   $48 $5012 $CEFF <0> Vop 
   s"  59    00004C 5212....     PUSH.B &EXEC ; "    exec &addr PUSH.B,     .chk   $4C $5212 $1800 <0> Vop 
   s"  60    000050 4512         PUSH.B R5 ; "    5 rn PUSH.B,              .chk   $50 $4512 <0> Vop 
@@ -153,16 +153,5 @@ CG1 and CG2 tested using mov instruction.
   s" 161    000152 3542         MOV #8,r5 ; "    8#  5 dRn mov, .chk    $152 $3542 <0> Vop 
   s" 162    000154 3543         MOV #0xFFFF,r5 ; "    ffff#  5 dRn mov, .chk   $154 $3543 <0> Vop 
 
-  s" 164    000156 0543         MOV #0,r5 ; "    0 s#k  5 dRn mov, .chk    $156 $3540 $0 <0> <--- Nop 
-  s" 165    000158 1543         MOV #1,r5 ; "    1 s#k  5 dRn mov, .chk    $15A $3540 $100 <0> <--- Nop 
-  s" 166    00015A 2543         MOV #2,r5 ; "    2 s#k  5 dRn mov, .chk    $15E $3540 $200 <0> <--- Nop 
-  s" 167    00015C 35400300     MOV #3,r5 ; "    3 s#k  5 dRn mov, .chk    $162 $3540 $300 <0> Vop 
-  s" 168    000160 2542         MOV #4,r5 ; "    4 s#k  5 dRn mov, .chk    $166 $3540 $400 <0> <--- Nop 
-  s" 169    000162 35400500     MOV #5,r5 ; "    5 s#k  5 dRn mov, .chk    $16A $3540 $500 <0> Vop 
-  s" 170    000166 35400600     MOV #6,r5 ; "    6 s#k  5 dRn mov, .chk    $16E $3540 $600 <0> Vop 
-  s" 171    00016A 35400700     MOV #7,r5 ; "    7 s#k  5 dRn mov, .chk    $172 $3540 $700 <0> Vop 
-  s" 172    00016E 3542         MOV #8,r5 ; "    8 s#k  5 dRn mov, .chk    $176 $3540 $800 <0> <--- Nop 
-  s" 173    000170 35400900     MOV #9,r5 ; "    9 s#k  5 dRn mov, .chk    $17A $3540 $900 <0> Vop 
-  s" 174    000174 3543         MOV #0xFFFF,r5 ; "    $FFFF s#k  5 dRn mov, .chk   $17E $3540 $FFFF <0> <--- Nop 
 
-9 non matching opcodes
+0 non matching opcodes

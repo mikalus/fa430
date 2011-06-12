@@ -43,7 +43,7 @@ cr
   s"  54    00003E 3512         PUSH @R5+ ; "    5 @rn+ PUSH,          .chk
   s"  55    000040 15120001     PUSH 0x100(R5) ; " 100 5 x(rn) PUSH,   .chk
 cr                                               
-  s"  57    000044 70120B00     PUSH.B #11 ; "    11 #k PUSH,              .chk
+  s"  57    000044 70120B00     PUSH.B #11 ; "   &11 #k PUSH.B,              .chk
   s"  58    000048 5012CEFF     PUSH.B EXEC ; "    exec addr PUSH.B,       .chk
   s"  59    00004C 5212....     PUSH.B &EXEC ; "    exec &addr PUSH.B,     .chk
   s"  60    000050 4512         PUSH.B R5 ; "    5 rn PUSH.B,              .chk
@@ -155,6 +155,7 @@ cr
   s" 161    000152 3542         MOV #8,r5 ; "    8#  5 dRn mov, .chk 
   s" 162    000154 3543         MOV #0xFFFF,r5 ; "    ffff#  5 dRn mov, .chk
 cr
+0 [if] (I was just curious ;-) 
   s" 164    000156 0543         MOV #0,r5 ; "    0 s#k  5 dRn mov, .chk 
   s" 165    000158 1543         MOV #1,r5 ; "    1 s#k  5 dRn mov, .chk 
   s" 166    00015A 2543         MOV #2,r5 ; "    2 s#k  5 dRn mov, .chk 
@@ -166,5 +167,6 @@ cr
   s" 172    00016E 3542         MOV #8,r5 ; "    8 s#k  5 dRn mov, .chk 
   s" 173    000170 35400900     MOV #9,r5 ; "    9 s#k  5 dRn mov, .chk 
   s" 174    000174 3543         MOV #0xFFFF,r5 ; "    $FFFF s#k  5 dRn mov, .chk
+[then]
 cr .result
 cr
