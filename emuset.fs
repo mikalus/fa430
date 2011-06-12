@@ -137,6 +137,11 @@
  ' POP, alias POP.W, 
 
 
+\ RET Emulation: MOV @SP+,PC
+: RET,        \ Return from subroutine: @SP --> PC, SP+2 --> SP [ - - - - ] 
+     SP s@Rn  PC dRn MOV, 
+
+
 
 \ RLA Emulation: ADD dst,dst 
 : RLA,   (2)  \ Rotate left arithmetically [ * * * * ] 

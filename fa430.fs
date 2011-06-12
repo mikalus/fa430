@@ -143,19 +143,19 @@ false value dstflag
 : s&ADDR   ( adr -- ) ( SR) 2 >sreg  to src set-src  01As  ; 
 :  &ADDR   ( adr -- ) ( SR) 2 >dreg  to src set-src  01As  ; 
 
-\ %10 Indirect register mode @Rn - As bit only. 
+\ %10 Indirect register mode @Rn - As bits only. 
 \ Rn is used as a pointer to the operand. 
 : s@Rn   ( rn -- ) >sreg  reset-src   10As  ; 
 :  @Rn   ( rn -- ) >dreg  reset-src   10As  ; 
 
-\ %11 Indirect autoincrement @Rn+ - As bit only. 
+\ %11 Indirect autoincrement @Rn+ - As bits only. 
 \ Rn is used as a pointer to the operand. 
 \ Rn is incremented afterwards by 1 for .B instructions 
 \ and by 2 for .W instructions. 
 : s@Rn+  ( rn -- ) >sreg reset-src   11As  ; 
 :  @Rn+  ( rn -- ) >dreg reset-src   11As  ; 
 
-\ %11 = Immediate mode #K - As bit only. See constant generator too
+\ %11 = Immediate mode #K - As bits only. See constant generator too
 \ (It is called #K instead of #N because #N is used in syntax layer later on.)
 \ The word following the instruction contains the immediate constant N. 
 \ Indirect autoincrement mode @PC+ is used. 
@@ -310,9 +310,6 @@ $1100 .W mneII: RRA.W,   ( src -- )   \ Rotate right arithmetically [ 0 * * * ]
 $1180 .W mneII: SXT,     ( src -- )   \ Extend sign [ 0 * * * ] 
 $1200 .W mneII: PUSH.W,  ( src -- )   \ Push source onto stack:  SP - 2 --> SP, src --> @SP [ - - - - ] 
 $1280 .W mneII: CALL,    ( src -- )   \ Call destination:  PC+2 --> stack, dst --> PC [ - - - - ] 
-\ $1300 .W mneII: RETI,    ( -- )       \ Return from subroutine:  @SP --> PC, SP + 2 --> SP [ - - - - ] 
-: RETI,    ( -- )  $1300 op, ;      \ Return from subroutine:  @SP --> PC, SP + 2 --> SP [ - - - - ] 
-
 
 $1040 .B mneII: RRC.B,   ( src -- )   \ Rotate right through C [ * * * * ] 
 $1140 .B mneII: RRA.B,   ( src -- )   \ Rotate right arithmetically [ 0 * * * ] 
@@ -321,7 +318,10 @@ $1240 .B mneII: PUSH.B,  ( src -- )   \ Push source onto stack:  SP - 2 --> SP, 
  ' RRC.W,  alias RRC, 
  ' RRA.W,  alias RRA, 
  ' PUSH.W, alias PUSH,
- ' RETI,   alias RET, 
+
+\ RETI is listed as a formatII instruction in User Guide, 
+\ but does not take any item from stack. So dont use mneII to create it. 
+: RETI,    ( -- )  $1300 op, ;          \ Return from subroutine:  @SP --> PC, SP + 2 --> SP [ - - - - ] 
 
 
 

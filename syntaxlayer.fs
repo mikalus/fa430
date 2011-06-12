@@ -28,7 +28,7 @@ $33 value mode#
 
 \ 1. mode for all registers 
 : R0 0 m1 ;     ' R0 alias PC  \ program counter 
-: R1 1 m1 ;     ' R1 alias SP  \ stack ponter 
+: R1 1 m1 ;     ' R1 alias SP  \ stack pointer 
 : R2 2 m1 ;     ' R2 alias SR  \ status register 
                 ' R2 alias CG1 \ Constant Generator Registers CG1 
 : R3 3 m1 ;     ' R3 alias CG2 \ Constant Generator Registers CG2 
