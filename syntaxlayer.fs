@@ -46,7 +46,7 @@ $33 value mode#
 : R14 14 m1 ; 
 : R15 15 m1 ; 
 
-\ for camelforth test 
+  \ alias for MSP430
 ' R1 alias RSP \ retur stack pointer
 ' R4 alias PSP \ parameter stack pointer
 ' R5 alias IP  \ instruction pointer
@@ -72,6 +72,13 @@ $33 value mode#
 : (R14) 14 m2 ; 
 : (R15) 15 m2 ; 
 
+  \ alias for MSP430
+' (R1) alias (RSP) \ retur stack pointer
+' (R4) alias (PSP) \ parameter stack pointer
+' (R5) alias (IP)  \ instruction pointer
+' (R6) alias (W)   \ working register
+' (R7) alias (TOS) \ top of (parameter) stack
+
 \ 3. mode is intrinsic mode, no modifier. 
 
 \ 4. mode 
@@ -95,6 +102,14 @@ $33 value mode#
 : @R14 14 m5 ; 
 : @R15 15 m5 ; 
 
+  \ alias for MSP430
+' @R1 alias @RSP \ retur stack pointer
+' @R4 alias @PSP \ parameter stack pointer
+' @R5 alias @IP  \ instruction pointer
+' @R6 alias @W   \ working register
+' @R7 alias @TOS \ top of (parameter) stack
+
+
 \ 6. mode for all registers 
 : @R0+ 0 m6 ;     ' @R0+ alias @PC+  \ program counter 
 : @R1+ 1 m6 ;     ' @R1+ alias @SP+  \ stack ponter 
@@ -112,6 +127,13 @@ $33 value mode#
 : @R13+ 13 m6 ; 
 : @R14+ 14 m6 ; 
 : @R15+ 15 m6 ; 
+
+  \ alias for MSP430
+' @R1+ alias @RSP+ \ retur stack pointer
+' @R4+ alias @PSP+ \ parameter stack pointer
+' @R5+ alias @IP+  \ instruction pointer
+' @R6+ alias @W+   \ working register
+' @R7+ alias @TOS+ \ top of (parameter) stack
 
 \ 7. mode 
   ' m7 alias #N ( n -- n ) 

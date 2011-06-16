@@ -162,7 +162,7 @@ testing [if]  ' setloca is [op]  [else]  ' nop is [op]  [then]
 : s@Rn   ( rn -- ) >sreg  reset-src   10As  ; 
 :  @Rn   ( rn -- ) >dreg  reset-src   10As  ; 
 
-\ %11 Indirect autoincrement @Rn+ - As bits only. 
+\ %11 Indirect register autoincrement @Rn+ - As bits only. 
 \ Rn is used as a pointer to the operand. 
 \ Rn is incremented afterwards by 1 for .B instructions 
 \ and by 2 for .W instructions. 
@@ -361,8 +361,8 @@ $1240 .B mneII: PUSH.B,  ( src -- )   \ Push source onto stack:  SP - 2 --> SP, 
     dup %1111111111 and swap 0< if %1000000000 or then ; 
 
 : offsetIIIforward ( adr -- ) there swap - 2/ 1- s>10 ; 
-: offsetIIIback ( label -- 10bit-pc-offset )  there - 2/ 1- s>10 ; 
-: formatIII ( label op -- )  mode or  swap offsetIIIback or  op, ; 
+: offsetIIIback ( adr -- 10bit-pc-offset )  there - 2/ 1- s>10 ; 
+: formatIII ( adr op -- )  mode or  swap offsetIIIback or  op, ; 
 : mneIII: ( opcode "name" -- ) create ,   does>  ( adr -- op ) @ formatIII  ;  
 
 $2000 mneIII: JNE, ( adr -- )   \ Jump if not equal/Jump if Z not set [ - - - - ] 
@@ -433,7 +433,7 @@ variable nops   variable errnops
 
 
 
-\ include syntaxlayer.fs ( secondary syntax layer to ease coding) 
+include syntaxlayer.fs ( secondary syntax layer to ease coding) 
 \ include emuset.fs 
 
 
