@@ -1,5 +1,5 @@
 \ Emulated MSP430 instruction set 
-\ Some instructions are available in basic syntax only.
+\ basic syntax only.
 
 
 
