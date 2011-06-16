@@ -1,30 +1,31 @@
-\ FORTH Assembler for TI MSP430x2xx Family                    
+\ FORTH Assembler for TI MSP430x2xx Family 
 
-\ Made with gforth 0-7-0 on MacOSX 10.4.11 PowerPC G4.
+\ Simple Assembler for Texas Instruments MSP430 Microcomputers 
+\ made with gforth 0-7-0 on MacOSX 10.4.11 PowerPC G4. 
 
-
-0 [if] Todo: 
--- verification of op codes.
-[then]
-\ 
-\ Information: 
-\ This simple Assembler is for Texas Instruments MSP430 Microcomputers.
 \ See: 
 \ MSP430x2xx Family User's Guide 
 \ SLAU144HâDecember 2004âRevised April 2011, S. 64, CPU. 
 \ © 2004â2011, Texas Instruments Incorporated 
-\ 
+
+
+\ Basic Syntax 
+
+\ Put source item on data stack, followed by source adressmode modifier word.
+\ Put destination item on data stack, followed by destination adressmode modifier word.
+\ The mnemonic opcode word finaly compiles the Instruktion, using mode, source and destination information.
+
+\ Assembler         Forth Assembler
+\ MOV r1,r2         r1 sRn r2 dRn MOV,  
+\ AND #0AA55h,TOM   $0AA55 s#N TOM dADDR AND,  
+
+
+
 \ Autor:          Michael Kalus (mk) 
 
 
-\ *** basic syntax 
-\ Adressmode modifying words follow an item.
-\ Mnemonic Opcode Words compile the Instruktion.
-\ Assembler         Forth Assembler
-\ MOV r1,r2         r1 sRn r2 dRn MOV,  
-\ AND #0AA55h,TOM   $0AA55 #N TOM ADDR AND,  
-\ 
-\ 
+
+
 
 : .. bye ; 
 : %% 2 base ! ; 
@@ -35,61 +36,74 @@ HERE
 
 vocabulary msp430assembler   msp430assembler definitions 
 
-\ ***  cross compiler memory  
+true constant testing 
 
-create startMSP $3F00 allot \ 16Kbyte
-here constant endMSP 
 
-: clearmsp   startmsp endmsp over - 0 fill ; clearmsp 
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 
 
-\ cross mem access words.  adr == startMSP + adrm 
-variable dpm  0 dpm ! 
-: herem  dpm @ ; 
+testing [if] 
 
-: c@m ( adrm -- c ) startMSP + c@ ; 
-: c!m ( n adrm -- ) startMSP + c! ; 
-: c,m ( n -- ) herem c!m   1 dpm +! ; 
+\ ***  target test memory  ( adr == tstart + tadr ) 
 
-true  constant big-endian
-false constant little-endian
+create tstart $3F00 allot \ 16Kbyte
+here constant tend 
 
-little-endian
-[if]   \ Big endian
-:  w@m  { adr -- w }    adr c@m 8 lshift     adr 1+ c@m + ; 
-:  w!m  { w adr -- w }  w 8 rshift adr c!m   w adr 1+ c!m ; 
-:  w,m  { w -- }        w 8 rshift c,m       w c,m ;        
-:  w.m  ( w -- )        hex. ; 
-[else] \ Little endian
-:  w@m  { adr -- w }    adr 1+ c@m 8 lshift     adr c@m + ;    
-:  w!m  { w adr -- w }  w 8 rshift adr 1+ c!m   w adr c!m ;    
-:  w,m  { w -- }        w c,m                   w 8 rshift c,m ; 
-:  w.m  { w -- }        w $00FF and 8 lshift  w $FF00 and 8 rshift or hex. ; 
+: tclear       tstart tend over - 0 fill ; tclear 
+
+variable tdp  0 tdp ! 
+: there  tdp @ ; 
+
+ 0 value loca  \ last opcode address. ( .lst .chk   gesetzt mit [op] )
+ defer [op] 
+: setloca  ( -- )    there to loca ; ( startcode, op, )
+
+
+: X_c@ ( tadr -- c ) tstart + c@ ; 
+: X_c! ( n tadr -- ) tstart + c! ; 
+: X_c, ( n -- ) there X_c!   1 tdp +! ; 
+
+\ Big endian 16Bit 
+\ :  X_@  { adr -- w }    adr X_c@ 8 lshift     adr 1+ X_c@ + ; 
+\ :  X_!  { w adr -- w }  w 8 rshift adr X_c!   w adr 1+ X_c! ; 
+\ :  X_,  { w -- }        w 8 rshift X_c,       w X_c, ;        
+\ :  X_.  ( w -- )        hex. ; 
+
+\ Little endian 16Bit 
+:  X_@  { adr -- w }    adr 1+ X_c@ 8 lshift     adr X_c@ + ;    
+:  X_!  { w adr -- w }  w 8 rshift adr 1+ X_c!   w adr X_c! ;    
+:  X_,  { w -- }        w X_c,                   w 8 rshift X_c, ; 
+:  X_.  { w -- }        w $00FF and 8 lshift  w $FF00 and 8 rshift or hex. ; 
+
 [then]
 
- 0 value lop \ last opcode address. 
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 
+
+
+
+\ *** collect data for cross compiling
+
  0 value mode \ addressmode mask 
  0 value src  \ source 
  0 value dst  \ destination 
 
-false value srcflag 
-false value dstflag 
+false value sflag 
+false value dflag 
 
-: reset-mode  0 to mode ; 
-: reset-src  false to srcflag ; 
-: reset-dst  false to dstflag ; 
+: reset-mode   0 to mode ; 
+: reset-src    false to sflag ; 
+: reset-dst    false to dflag ; 
 
-: set-src  true to srcflag ; 
-: set-dst  true to dstflag ; 
+: set-src      true to sflag ; 
+: set-dst      true to dflag ; 
 
-: ?src,  ( -- ) srcflag if src w,m then reset-src ; 
-: ?dst,  ( -- ) dstflag if dst w,m then reset-dst ; 
+: src,  ( -- ) sflag if src X_, then reset-src ; 
+: dst,  ( -- ) dflag if dst X_, then reset-dst ; 
 
-: [op]  ( -- ) herem to lop ; 
-: op@ ( -- op ) lop w@m ; 
-: op! ( op -- ) lop w!m ; 
-: op,    ( op -- ) [op] w,m reset-mode ; 
+: op@   ( -- op ) loca X_@ ; ( wird gar nicht benutzt) 
+: op!   ( op -- ) loca X_! ; ( wird gar nicht benutzt)
+: op,   ( op -- ) [op]  X_, reset-mode ; ( formI,II,III, reti)
 
-
+testing [if]  ' setloca is [op]  [else]  ' nop is [op]  [then] 
 
 
 \ *** Addressing modes
@@ -103,8 +117,8 @@ false value dstflag
 : s>16 ( n -- n16 ) \ convert single precission to 16bit 2-complement. 
     dup %1111111111111111 and swap 0< if %1000000000000000 or then ; 
 
-: src-adr-offset ( adr -- 16bit-pc-offset )  herem - 2 - s>16 ; 
-: dst-adr-offset ( adr -- 16bit-pc-offset )  herem - 4 - s>16 ; 
+: src-adr-offset ( adr -- 16bit-pc-offset )  there - 2 - s>16 ; 
+: dst-adr-offset ( adr -- 16bit-pc-offset )  there - 4 - s>16 ; 
 
 \ patch mode bits 
 \ set   bit4,5       %0000000000xx0000 or 
@@ -242,7 +256,7 @@ false value dstflag
 \ Forth: 10 s#N r5 dRn RRC, 
 \ src 10 is immediate mode, dst R5 is Register mode 
 
-: formatI ( op -- )  mode or op, ?src, ?dst, ; 
+: formatI ( op -- )  mode or op, src, dst, ; 
 : mneI: ( opcode "name" -- ) create ,   does>  ( adr -- op ) @ formatI  ;  
 
 $4000 .W mneI: MOV.W,   
@@ -301,7 +315,7 @@ $F000 .B mneI: AND.B,
 \ Assembler example: RRC R5  ; Register mode 
 \ Forth: r5 rn RRC,  \ r5 is a constant ( Rn may NOT be absent). 
 
-: formatII ( op -- )  mode or op, ?src,  ; 
+: formatII ( op -- )  mode or op, src,  ; 
 : mneII: ( opcode "name" -- ) create ,   does>  ( adr -- op ) @ formatII  ;  
 
 $1000 .W mneII: RRC.W,   ( src -- )   \ Rotate right through C [ * * * * ] 
@@ -346,8 +360,8 @@ $1240 .B mneII: PUSH.B,  ( src -- )   \ Push source onto stack:  SP - 2 --> SP, 
 : s>10 ( n -- n10 ) \ convert single precission to 10bit 2-complement. 
     dup %1111111111 and swap 0< if %1000000000 or then ; 
 
-: offsetIIIforward ( adr -- ) herem swap - 2/ 1- s>10 ; 
-: offsetIIIback ( label -- 10bit-pc-offset )  herem - 2/ 1- s>10 ; 
+: offsetIIIforward ( adr -- ) there swap - 2/ 1- s>10 ; 
+: offsetIIIback ( label -- 10bit-pc-offset )  there - 2/ 1- s>10 ; 
 : formatIII ( label op -- )  mode or  swap offsetIIIback or  op, ; 
 : mneIII: ( opcode "name" -- ) create ,   does>  ( adr -- op ) @ formatIII  ;  
 
@@ -366,58 +380,57 @@ $3C00 mneIII: JMP, ( adr -- )   \ Jump PC + 2 * offset --> PC [ - - - - ]
   ' JC,  alias JHS,
 
 
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 
 
-\ *** Assembler facilities 
+true [if] ( verification process ) 
 
 \ -- label tabel
 &10 constant maxlabels 
 variable (lbl) maxlabels cells allot  
-: >label    ( n -- )  herem swap cell * (lbl) + ! ; 
+: >label    ( n -- )  there swap cell * (lbl) + ! ; 
 : label>    ( n -- addr )  cell * (lbl) + @ ;
 : .labels   ( -- )   ." labels" cr maxlabels 0 do i . i label> . cr loop ; 
 : clrlabels ( -- )   maxlabels 0 do i >label loop ; 
 
-\ -- solve forward jump 
-\ (f jxx,  ...  f) 
-: (f  ( -- adr mark herem ) herem $1122 over 2 + ; 
+\ -- solve forward jump: (f jxx,  ...  f) 
+: (f  ( -- adr mark there ) there $1122 over 2 + ; 
 : f)  ( adr mark -- ) 
-  $1122 = if >r  r@ offsetIIIforward  r@ w@m  or  r> w!m   
+  $1122 = if >r  r@ offsetIIIforward  r@ X_@  or  r> X_!   
           else c" expected (f " c(abort") then ; 
 
-\ -- solve backward jump 
-\ (b  ....  b) jxx, 
-: (b  ( -- adr mark) herem $3344 ; 
+\ -- solve backward jump:  (b  ....  b) jxx, 
+: (b  ( -- adr mark) there $3344 ; 
 : b)  ( adr mark -- )  $3344 = if else c" expected b) " c(abort") then ; 
 
-
-\ *** for verification purpose only 
-
-: (.lst) ( adr n  -- adr n ) \ list a compiled instruction. 
-    cr source type 3 spaces lop hex.  
-    herem lop - 0  ?do lop i + w@m w.m 2 +loop  ; 
+variable nops   variable errnops
+: (.lst) ( adr n  -- adr n ) \ list last compiled instruction. 
+    cr source type 3 spaces loca hex.  
+    there loca - 0  ?do loca i + X_@ X_. 2 +loop  ; 
 : .lst   ( adr n  -- )  2drop (.lst) .s ; 
+: $op  ( adr n -- )  drop &14 + 4 evaluate  1 nops +! ; 
+: X_w@be  { adr -- w }  adr X_c@ 8 lshift  adr 1+ X_c@ + ; \ big endian. 
+: ops? ( adr n -- ) $op loca X_w@be = ; 
+: .chk ( adr n -- )  \ check last compiled instruktion. 
+    (.lst) ops? if .s ." Vop " else .s ." <--- Nop " 1 errnops +! then ;
 
-variable nops
-: $op  ( adr n -- ) drop &14 + 4 evaluate ; 
-:  w@mbe  { adr -- w }    adr c@m 8 lshift     adr 1+ c@m + ; \ big endian. 
-: ops? ( adr n -- ) $op lop w@mbe = ; 
-: .chk ( adr n -- )  \ check compiled instruktion. 
-    (.lst) ops? if .s ." Vop " else .s ." <--- Nop " 1 nops +! then ;
-
-0 value startadr 
-0 value endadr 
+0 value startadr   0 value endadr 
 : .startcode ( -- ) 
-    herem to startadr ." herem=" herem hex. cr 
+    there to startadr ." there=" there hex. cr 
     [op]   reset-src   reset-dst   0 to mode ; 
 : .endcode   ( -- ) 
-    herem to endadr ." herem=" herem hex. cr ; 
+    there to endadr ." there=" there hex. cr ; 
 : .dumpcode  ( -- ) 
-    cr ." dump code area" startadr startMSP +  endadr startadr -  dump ; 
+    cr ." dump code area" startadr tstart +  endadr startadr -  dump ; 
 : .dumpcode-all ( -- ) 
-    cr ." dump code area" startMSP  endadr   dump ; 
+    cr ." dump code area" tstart  endadr   dump ; 
 
 : verification ( -- ) cr .startcode  clrlabels  0 nops ! ; 
-: .result ( -- ) cr nops @ . ." non matching opcodes" ; 
+: .result ( -- ) 
+   cr    nops @ . ." opcodes & addressing modes tested." 
+   cr errnops @ . ." non matching opcodes." ; 
+
+[then]
+
 
 
 \ include syntaxlayer.fs ( secondary syntax layer to ease coding) 
