@@ -1,6 +1,6 @@
-\ Length of MSP430-Assembler: 25548 Bytes 
+\ Length of MSP430-Assembler: 25688 Bytes 
 
-herem=$0 
+there=$0 
 
 
 
@@ -105,8 +105,8 @@ format-II instructions
 
 format-I instructions, tested using mov
 
-  s" 116    0000C8              EXECm: ; "    herem constant execm .lst   $C4 $9511 $1 <0> 
-  s" 117    0000C8              LABELm: ; "    herem constant labelm .lst   $C4 $9511 $1 <0> 
+  s" 116    0000C8              EXECm: ; "    there constant execm .lst   $C4 $9511 $1 <0> 
+  s" 117    0000C8              LABELm: ; "    there constant labelm .lst   $C4 $9511 $1 <0> 
 
   s" 119    0000C8              ; 1 drn " .lst   $C4 $9511 $1 <0> 
   s" 120    0000C8 3440....     MOV #EXECm,r4 ; "    execm s#k 4 drn MOV,       .chk   $C8 $3440 $C800 <0> Vop 
@@ -154,4 +154,5 @@ CG1 and CG2 tested using mov instruction.
   s" 162    000154 3543         MOV #0xFFFF,r5 ; "    ffff#  5 dRn mov, .chk   $154 $3543 <0> Vop 
 
 
-0 non matching opcodes
+68 opcodes & addressing modes tested.
+0 non matching opcodes.

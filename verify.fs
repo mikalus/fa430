@@ -24,7 +24,7 @@ cr
 
 
 cr cr cr .( format-II instructions) 
-cr herem constant exec 
+cr there constant exec 
   s"  40    000018               EXEC:     ; "                         .lst
   s"  41    000018 B012....     CALL #EXEC ; "    exec #k CALL,        .chk
   s"  42    00001C 9012FAFF     CALL EXEC ; "    exec addr CALL,       .chk
@@ -105,8 +105,8 @@ cr
 
 cr cr cr .( format-I instructions, tested using mov)
 cr 
-  s" 116    0000C8              EXECm: ; "    herem constant execm .lst
-  s" 117    0000C8              LABELm: ; "    herem constant labelm .lst
+  s" 116    0000C8              EXECm: ; "    there constant execm .lst
+  s" 117    0000C8              LABELm: ; "    there constant labelm .lst
 cr
   s" 119    0000C8              ; 1 drn " .lst
   s" 120    0000C8 3440....     MOV #EXECm,r4 ; "    execm s#k 4 drn MOV,       .chk
