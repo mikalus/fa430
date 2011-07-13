@@ -525,14 +525,34 @@ folgendes aus COLD noch klŠren:
 
  \ arithmetic
 
+\ Adopted from section 5.1.1 of MSP430 Family Application Reports. 
+\ IRBT   .EQU R9 ; Bit test register MPY 
+\ IROP1  .EQU R4 ; First operand 
+\ IROP2L .EQU R5 ; Second operand low word 
+\ IROP2M .EQU R6 ; Second operand high word 
+\ IRACL  .EQU R7 ; Result low word 
+\ IRACM  .EQU R8 ; Result high word 
+
   ?!Code um*      ( u1 u2 -- ud ) \ unsigned multiply
-      rp , r3 mov.w:g
-      r2 pop.w:g
-      r2 , r2r0 mulu.w:g
-      r0 push.w:g
-      r2 , tos mov.w:g
-      r3 , rp mov.w:g
-      r3 , r3 xor.w
+    \ IROP1 = TOS register
+    @PSP R5 MOV     \ get u1, leave room on stack
+    \ T.I. SIGNED MULTIPLY SUBROUTINE: TOS x R5 -> R8|R7
+    R7 CLR          \ 0 -> LSBs RESULT
+    R8 CLR          \ 0 -> MSBs RESULT
+    \ UNSIGNED MULTIPLY AND ACCUMULATE SUBROUTINE:
+    \ (TOS x R5) + R8|R7 -> R8|R7
+    R6 CLR          \ MSBs MULTIPLIER
+    1# R9 MOV       \ BIT TEST REGISTER
+(b  R9 TOS BIT      \ TEST ACTUAL BIT
+    (f JZ           \ IF 0: DO NOTHING
+       R5 R7 ADD    \ IF 1: ADD MULTIPLIER TO RESULT
+       R6 R8 ADDC     
+    f) RLA R5 RLA   \ MULTIPLIER x 2
+       RLC R6 RLC     
+       RLA R9 RLA   \ NEXT BIT TO TEST
+b)  JNC             \ IF BIT IN CARRY: FINISHED
+        R7 0 (PSP) MOV  \ low result on stack
+        R8 TOS MOV      \ high result in TOS
       next,
    End-Code
 
