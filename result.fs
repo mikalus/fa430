@@ -1,4 +1,4 @@
-\ Length of MSP430-Assembler: 25688 Bytes 
+\ Length of MSP430-Assembler: 32860 Bytes 
 
 there=$0 
 

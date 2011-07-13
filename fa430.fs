@@ -392,16 +392,6 @@ variable (lbl) maxlabels cells allot
 : .labels   ( -- )   ." labels" cr maxlabels 0 do i . i label> . cr loop ; 
 : clrlabels ( -- )   maxlabels 0 do i >label loop ; 
 
-\ -- solve forward jump: (f jxx,  ...  f) 
-: (f  ( -- adr mark there ) there $1122 over 2 + ; 
-: f)  ( adr mark -- ) 
-  $1122 = if >r  r@ offsetIIIforward  r@ X_@  or  r> X_!   
-          else c" expected (f " c(abort") then ; 
-
-\ -- solve backward jump:  (b  ....  b) jxx, 
-: (b  ( -- adr mark) there $3344 ; 
-: b)  ( adr mark -- )  $3344 = if else c" expected b) " c(abort") then ; 
-
 variable nops   variable errnops
 : (.lst) ( adr n  -- adr n ) \ list last compiled instruction. 
     cr source type 3 spaces loca hex.  
@@ -430,6 +420,18 @@ variable nops   variable errnops
    cr errnops @ . ." non matching opcodes." ; 
 
 [then]
+
+\ -- solve forward jump: (f jxx,  ...  f) 
+: (f  ( -- adr mark there ) there $1122 over 2 + ; 
+: f)  ( adr mark -- ) 
+  $1122 = if >r  r@ offsetIIIforward  r@ X_@  or  r> X_!   
+          else c" expected (f " c(abort") then ; 
+
+\ -- solve backward jump:  (b  ....  b) jxx, 
+: (b  ( -- adr mark) there $3344 ; 
+: b)  ( adr mark -- )  $3344 = if else c" expected b) " c(abort") then ; 
+
+
 
 
 

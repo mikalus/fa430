@@ -1,5 +1,15 @@
 \ MSP430 primitives
 
+\ cfCode:  cfCode   Umsetzung von camel forth (mk)
+\ mkCode  meine eigener Versuche.
+\ ???Code ist ungeklŠrt.
+\ ?! ist noch nicht Ÿbersetzt in MSP430
+
+
+
+
+
+
 \ Copyright (C) 2006,2007 Free Software Foundation, Inc.
 
 \ This file is part of Gforth.
@@ -25,7 +35,7 @@
 \   R6      W     working register
 \   R7      TOS   top of parameter stack
 
-
+\ MSP430 is 1s complement signed nummers. 
 
 \ * Memory ( use only one 64K-Page ): TBD
 \ **************************************************************
@@ -39,11 +49,20 @@ start-macros
    reset  \ hfs
 
  \ system depending macros
-  : next,
+  cf: next,
     @IP+ W  MOV
     @W+  PC MOV ; 
 
+    : savetos
+      2# PSP sub
+      TOS 0 (PSP) mov  ;
+
+    : loadtos
+      @PSP+ TOS MOV ;
+
 end-macros
+
+
 
   unlock
     $00000 $1FFFF region address-space
@@ -92,17 +111,12 @@ folgendes aus COLD noch klŠren:
 \ GFORTH minimal primitive set
 \ ==============================================================
 
-\ mCode:  mCode   sind Versuche von mir MK
-\ ???Code ist ungeklŠrt.
-\ ?! ist noch nicht Ÿbersetzt in MSP430
-
-
 
  \ inner interpreter
 
   align
 
-  mCode: :docol
+  cfCode: :docol
 \    '2 dout,                    \ only for debugging
     ip push
     w ip mov
@@ -111,7 +125,7 @@ folgendes aus COLD noch klŠren:
 
   align
 
-  mCode: :docon
+  cfCode: :docon
 \    '2 dout,                    \ only for debugging
     2# PSP sub
     tos 0 (psp) mov
@@ -156,7 +170,7 @@ folgendes aus COLD noch klŠren:
      next,                                       \ execute does> part
   End-Code
 
-  $FF $C0FE here - tcallot
+  $FF $C0FE here - tcallot  ???
   
   ???Code: :dovar  ist das nicht gleich docon ? mk
 \    '2 dout,                    \ only for debugging
@@ -167,26 +181,25 @@ folgendes aus COLD noch klŠren:
   End-Code
 
 \ program flow
-  ???Code ;s       ( -- ) \ exit colon definition
+  mCode ;s       ( -- ) \ exit colon definition
 \    '; dout,                    \ only for debugging
-      rp , w mov.w:g  # 2 , rp add.w:q
-      [w] , ip mov.w:g
-      next,
+    @RSP+ IP mov    ; pop old IP from return stack
+    next,
   End-Code
 
-  mCode execute   ( xt -- ) \ execute colon definition
+  cfCode execute   ( xt -- ) \ execute colon definition
     tos w mov       \ copy tos to w
     @psp+ tos mov   \ get new tos
     @w+ pc          \ mov fetch code address into PC, W=PFA
   End-Code
 
-wozu perform ???
-  ???Code perform   ( xt -- ) \ execute colon definition
-    tos , w mov.w:g                          \ copy tos to w
-    tos pop.w:g                              \ get new tos
-    [w] , w mov.w:g
-    next1,
-  End-Code
+\ wird high level bereit gestellt:  : perform ( adr - ) @ execute ;
+\  Code perform   ( adr -- ) \ execute colon definition at adr.
+\    tos , w mov.w:g                          \ copy tos to w
+\    tos pop.w:g                              \ get new tos
+\    [w] , w mov.w:g
+\    next1,
+\  End-Code
 
   ???Code ?branch   ( f -- ) \ jump on f=0
       # 2 , ip add.w:q
@@ -253,34 +266,37 @@ wozu perform ???
   End-Code
 
  \ memory access
-  mCode @        ( addr -- n ) \ read cell
+  cfCode @        ( addr -- n ) \ read cell
     @tos tos mov
     next,
    End-Code
 
-  mCode !        ( n addr -- ) \ write cell
+  cfCode !        ( n addr -- ) \ write cell
     @PSP+ 0 (TOS) mov 
     @PSP+ TOS mov 
     next,
    End-Code
 
-  mCode +!        ( n addr -- ) \ write cell
+  cfCode +!        ( n addr -- ) \ write cell
     @PSP+ 0 (TOS) add
     @PSP+ TOS mov
     next,
    End-Code
 
-  mCode c@        ( addr -- uc ) \ read cell
+  cfCode c@        ( addr -- uc ) \ read cell
     @TOS TOS mov
     next,
    End-Code
 
-  ?!Code count     ( addr -- addr+1 uc ) \ read cell
-...
-      next,
+  mkCode count     ( addr -- addr+1 uc ) \ read cell
+    2# psp sub
+    tos 0 (psp) mov 
+    1# tos add
+    @tos tos mov
+    next,
    End-Code
 
-  mCode c!        ( n addr -- ) \ write cell
+  cfCode c!        ( n addr -- ) \ write cell
     @PSP+ W mov 
     W 0 (TOS) mov.b 
     @PSP+ TOS mov 
@@ -288,208 +304,204 @@ wozu perform ???
    End-Code
 
  \ arithmetic and logic
-  mCode +        ( n1 n2 -- n3 ) \ addition
+  cfCode +        ( n1 n2 -- n3 ) \ addition
     @PSP+ TOS add
     next,
   End-Code
   
-  mCode 2*        ( n1 -- n2 ) 
+  cfCode 2*        ( n1 -- n2 ) 
     TOS TOS add
     next,
   End-Code
   
-  mCode -        ( n1 n2 -- n3 ) \ subtract n2 - n1
+  cfCode -        ( n1 n2 -- n3 ) \ subtract n2 - n1
     @PSP+ W mov
     TOS W sub
     W TOS mov
     next,
   End-Code
 
-  mCode negate ( n1 -- n2 )
-    FFFF# TOS xor.w
+  cfCode negate ( n1 -- n2 )
+    -1 #N TOS xor.w
     1# TOS add
     next,
   End-Code
   
-  mCode invert ( n1 -- n2 )
-    FFFF# TOS xor.w
+  cfCode invert ( n1 -- n2 )
+    -1 #N TOS xor.w
     next,
   End-Code
   
-  mCode 1+        ( n1 -- n2 ) \ addition
+  cfCode 1+        ( n1 -- n2 ) \ addition
     1# TOS add
     next,
   End-Code
   
-  mCode 1-        ( n1 -- n2 ) \ addition
+  cfCode 1-        ( n1 -- n2 ) \ addition
     1# TOS sub
     next,
   End-Code
   
-  mCode cell+        ( n1 -- n2 ) \ addition
+  cfCode cell+        ( n1 -- n2 ) \ addition
     2# tos add
     next,
   End-Code
   
-  mCode and        ( n1 n2 -- n3 ) \ logic
+  cfCode and        ( n1 n2 -- n3 ) \ logic
     @PSP+ TOS and.w
     next,
   End-Code
   
-  mCode or       ( n1 n2 -- n3 ) \ logic
+  cfCode or       ( n1 n2 -- n3 ) \ logic
     @PSP+ TOS bis
     next,
   End-Code
   
-  mCode xor      ( n1 n2 -- n3 ) \ logic
+  cfCode xor      ( n1 n2 -- n3 ) \ logic
     @PSP+,TOS xor.w
     next,
    End-Code
 
  \ moving datas between stacks
-  mCode r>       ( -- n ; R: n -- )
+  cfCode r>       ( -- n ; R: n -- )
     2# PSP sub 
     TOS 0 (PSP) mov 
     @RSP+ TOS mov
     next,
   End-Code
   
-  mCode i       ( -- n ; R: n -- n ) \ alias r@ 
+  \ bei drei Schleifen liegt auf dem returnstack: ( R: k' k j' j i' i -- )
+  \ Dabei ist i' das limit der innersten Schleife, i der ZŠhler, usw.
+
+  cfCode i       ( -- i ; R: i -- i ) 
     2# PSP sub
     TOS 0 (PSP) mov
     @RSP TOS mov
     next,
    End-Code
 
-  ???Code i'       ( -- n ; R: n -- )
-      tos push.w:g
-      rp , w mov.w:g
-      2 [w] , tos mov.w:g
+  mkCode i'       ( -- limit ; R: i' i  -- i' i )
+    savetos
+    2 (RSP) tos mov
       next,
    End-Code
 
-  ?!Code j       ( -- n ; R: n -- )
-      tos push.w:g
-      rp , w mov.w:g
-      4 [w] , tos mov.w:g
+  mkCode j       ( -- j ; ( R: j' j i' i -- j' j i' i )
+    savetos
+    4 (RSP) tos mov
       next,
    End-Code
 
-  ?!Code k       ( -- n ; R: n -- )
-      tos push.w:g
-      rp , w mov.w:g
-      8 [w] , tos mov.w:g
+  mkCode k       ( -- k ; ( R: k' k j' j i' i -- k' k j' j i' i )
+    savetos
+    6 (RSP) tos mov
       next,
    End-Code
 
-   mCode >r       ( n -- ; R: -- n )
+   cfCode >r       ( n -- ; R: -- n )
     TOS push
     @PSP+ TOS mov
     next,
    End-Code
 
-   ?!Code rdrop       ( R:n -- )
-      # 2 , rp add.w:q  \ ? hfs
-      next,
+   mkCode rdrop       ( R: n -- )
+    2# RSP add
+    next,
    End-Code
 
-   ?!Code unloop       ( R:n -- )
-      # 4 , rp add.w:q  \ ? hfs
-      next,
+   mkCode unloop       ( R: n -- )
+    4# rsp add 
+    next,
    End-Code
 
  \ datastack and returnstack address
-  mCode sp@      ( -- sp ) \ get stack address
+  cfCode sp@      ( -- sp ) \ get stack address
     2# PSP sub
     TOS 0 (PSP) mov
     PSP TOS mov
     next,
   End-Code
 
-  mCode sp!      ( sp -- ) \ set stack address
+  cfCode sp!      ( sp -- ) \ set stack address
     TOS PSP mov
     @PSP+ TOS mov
     next,
   End-Code
 
-  mCode rp@      ( -- rp ) \ get returnstack address
+  cfCode rp@      ( -- rp ) \ get returnstack address
     2# PSP sub
     TOS 0 (PSP) mov
     RSP TOS mov
     next,
   End-Code
 
-  mCode rp!      ( rp -- ) \ set returnstack address
+  cfCode rp!      ( rp -- ) \ set returnstack address
     TOS RSP mov
     @PSP+ TOS mov
     next,
   End-Code
 
-  ?!Code branch   ( -- ) \ unconditional branch
-      [ip] , ip mov.w:g
-      next,
+ \ branch and literal
+  mkCode branch   ( -- ) \ unconditional branch
+    @ip ip mov 
+    next,
    End-Code
 
-  mCode lit     ( -- n ) \ inline literal
+  cfCode lit     ( -- n ) \ inline literal
     2# PSP sub 
     TOS 0 (PSP) mov 
     @IP+ TOS mov 
     next,
    End-Code
 
-Code: :doesjump
-end-code
+\ Code: :doesjump  ( in ITC nicht nštig.) 
+\ end-code
 
 \ ==============================================================
 \ usefull lowlevel words
 \ ==============================================================
- \ word definitions
-
-
- \ branch and literal
 
  \ data stack words
-  mCode dup      ( n -- n n )
+  cfCode dup      ( n -- n n )
     2# PSP sub  \ push old TOS..
     TOS  0 (PSP) mov \ ..onto stack
     next,
    End-Code
 
-  ?!Code 2dup     ( d -- d d ) \  over over
-    r1 pop.w:g
-    r1 push.w:g
-    tos push.w:g
-    r1 push.w:g
+  mkCode 2dup     ( d -- d d ) \  over over
+    4# PSP SUB 
+    4 (PSP) 0 (PSP) mov
+    tos 2 (PSP) mov
     next,
    End-Code
 
-  mCode drop     ( n -- )
+  cfCode drop     ( n -- )
     @PSP+ TOS mov
     next,
    End-Code
 
-  mCode 2drop    ( d -- )
+  cfCode 2drop    ( d -- )
     @PSP+ TOS mov
     @PSP+ TOS mov
     next,
    End-Code
 
-  mCode swap     ( n1 n2 -- n2 n1 )
+  cfCode swap     ( n1 n2 -- n2 n1 )
     @PSP W mov
     TOS 0 (PSP) mov
     W TOS mov
     next,
    End-Code
 
-  mCode over     ( n1 n2 -- n1 n2 n1 )
-    @PSP W mov  
+  cfCode over     ( n1 n2 -- n1 n2 n1 )
+    @PSP W mov
     2# PSP sub
     TOS 0 (PSP) mov
     W TOS mov
     next,
    End-Code
 
-  mCode rot      ( n1 n2 n3 -- n2 n3 n1 )
+  cfCode rot      ( n1 n2 n3 -- n2 n3 n1 )
     @PSP W mov 
     TOS 0 (PSP) mov 
     2 (PSP) TOS mov 
@@ -497,24 +509,18 @@ end-code
     next,
    End-Code
 
-  ?!Code -rot     ( n1 n2 n3 -- n3 n1 n2 )
-    tos , r1 mov.w:g
-    tos pop.w:g
-    r3 pop.w:g
-    r1 push.w:g
-    r3 push.w:g
-    r3 , r3 xor.w
+  mkCode -rot     ( n1 n2 n3 -- n3 n1 n2 )
+    tos w mov
+    0 (psp) tos mov
+    2 (psp) 0 (psp) mov
+    w 2 (psp) mov
     next,
    End-Code
 
 
  \ return stack
-  ?!Code r@       ( -- n ; R: n -- n ) alias i ???
-    tos push.w:g
-    rp , w mov.w:g
-    [w] , tos mov.w:g
-    next,
-  End-Code
+   ' i alias r@ 
+
 
 
  \ arithmetic
@@ -553,48 +559,58 @@ end-code
       next,
    End-Code
 
+
+
  \ shift
-  mCode 2/       ( n1 -- n2 ) \ arithmetic shift right
-    TOS rra
+
+  cfCode 2*       ( n1 -- n2 ) \ arithmetic shift left
+    TOS TOS ADD
     next,
    End-Code
 
-  ?!Code lshift   ( n1 n2 -- n3 ) \ shift n1 left n2 bits
- \     tos.b , r1h mov.w:g
-      tos.b , r1h mov.b:g  \ ? hfs
-      tos pop.w:g
-      r1h , tos shl.w
-      next,
+  cfCode 2/       ( n1 -- n2 ) \ arithmetic shift right
+    TOS RRA
+    next,
    End-Code
 
-  ?!Code rshift   ( n1 n2 -- n3 ) \ shift n1 right n2 bits
-\     tos.b , r1h mov.w:g
-      tos.b , r1h mov.b:g  \ ? hfs
-      r1h neg.b
-      tos pop.w:g
-      r1h , tos shl.w
+  cfCode lshift   ( n1 n2 -- n3 ) \ shift n1 left n2 bits
+    @PSP+ W MOV
+    $1F N# TOS AND       ; no need to shift more than 16
+(f  JZ
+      (b  W W ADD   #1 TOS SUB  b) JNZ
+f)  W TOS MOV
+    next,
+   End-Code
+
+  cfCode rshift   ( n1 n2 -- n3 ) \ shift n1 right n2 bits
+     @PSP+ W MOV
+     $1F N# TOS AND       ; no need to shift more than 16
+(f   JZ
+       (b  CLRC   W RRC   #1 TOS SUB  b) JNZ
+f)   W,TOS MOV
      next,
    End-Code
 
+
+
  \ compare
-  mCode 0=       ( n -- f ) \ Test auf 0
+  cfCode 0=       ( n -- f ) \ Test auf 0
     1# TOS sub     ; borrow (clear cy) if TOS was 0
     TOS TOS subc    ; TOS=-1 if borrow was set
     next,
    End-Code
 
-   mCode 0<       ( n -- f ) \ Test auf 0
+   cfCode 0<       ( n -- f ) \ Test auf 0
     TOS TOS add    ; set cy if TOS negative
     TOS TOS subc    ; TOS=-1 if carry was clear
-    ffff# TOS xor.w    ; TOS=-1 if carry was set
+    -1 #N TOS xor.w    ; TOS=-1 if carry was set
     next,
    End-Code
 
   ?!Code =        ( n1 n2 -- f ) \ Test auf Gleichheit
-    r1 pop.w:g
-    r1 , tos sub.w:g
-    0= IF  # -1 , tos mov.w:q   next,
-    THEN   #  0 , tos mov.w:q   next,
+    @PSP+ W MOV
+    TOS W SUB  ; x1-x2 in W, flags set
+??    0= IF  ffff# TOS MOV   ELSE   0# TOS MOV   THEN 
    End-Code
 
    ' = alias u=
@@ -626,6 +642,10 @@ end-code
     < IF  # -1 , tos mov.w:q   next,
     THEN   #  0 , tos mov.w:q   next,
    End-Code
+
+
+
+\ I/O
 
   ?!Code (key)    ( -- char ) \ get character
       tos push.w:g
@@ -725,6 +745,8 @@ end-code
        next,
    end-code
 
+
+
    Variable timer
    
    ?!Code ms-irq ( -- )
@@ -742,6 +764,7 @@ end-code
    : noop ;
    defer pause ' noop is pause
    
+
    : ms ( n -- )  timer @ +
        BEGIN  pause dup timer @ - 0<  UNTIL  drop ;
    
