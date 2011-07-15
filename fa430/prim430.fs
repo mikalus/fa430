@@ -27,7 +27,9 @@
 \ You should have received a copy of the GNU General Public License
 \ along with this program. If not, see http://www.gnu.org/licenses/.
 
-\ * Register using for MSP430
+
+
+\ * Registers used: 
 \  MSP430   Forth    used for
 \   R1      RSP   returnstack pointer
 \   R4      PSP   parameter stack pointer
@@ -35,21 +37,25 @@
 \   R6      W     working register
 \   R7      TOS   top of parameter stack
 
-\ MSP430 is 1s complement signed nummers. 
+\ MSP430 is 1s complement signed nummers? 
 
-\ * Memory ( use only one 64K-Page ): TBD
+' code alias cfCode
+' code alias mkCode
+' :    alias cf:
+
+
+
+\ * Memory 
 \ **************************************************************
 
 
-start-macros
- \ register definition
-
+\ << start-macros
 
  \ hfs wichtig, damit der erste Befehl richtig compiliert wird
-   reset  \ hfs
+\ <<  reset  \ hfs
 
  \ system depending macros
-  cf: next,
+  cf: next, 
     @IP+ W  MOV
     @W+  PC MOV ; 
 
@@ -60,10 +66,10 @@ start-macros
     : loadtos
       @PSP+ TOS MOV ;
 
-end-macros
+\ << end-macros
 
 
-
+0 [if]
   unlock
     $00000 $1FFFF region address-space
 \    $0FFFF $0FFE0  ( inertupt vector tabel )
@@ -105,6 +111,7 @@ folgendes aus COLD noch klŠren:
     I fset
   next,
   End-Label
+[then]
 
 
 \ ==============================================================
@@ -116,7 +123,7 @@ folgendes aus COLD noch klŠren:
 
   align
 
-  cfCode: :docol
+  cfCode :docol
 \    '2 dout,                    \ only for debugging
     ip push
     w ip mov
@@ -125,7 +132,7 @@ folgendes aus COLD noch klŠren:
 
   align
 
-  cfCode: :docon
+  cfCode :docon
 \    '2 dout,                    \ only for debugging
     2# PSP sub
     tos 0 (psp) mov
@@ -134,7 +141,7 @@ folgendes aus COLD noch klŠren:
   End-Code
 
   align
-
+0 [if]
   ???Code: :dovalue
 \    '2 dout,                    \ only for debugging
     tos push.w:g
@@ -179,11 +186,12 @@ folgendes aus COLD noch klŠren:
     w , tos mov.w:g
     next,
   End-Code
+[then]
 
 \ program flow
-  mCode ;s       ( -- ) \ exit colon definition
+  mkCode ;s       ( -- ) \ exit colon definition
 \    '; dout,                    \ only for debugging
-    @RSP+ IP mov    ; pop old IP from return stack
+    @RSP+ IP mov    \ pop old IP from return stack
     next,
   End-Code
 
@@ -201,6 +209,7 @@ folgendes aus COLD noch klŠren:
 \    next1,
 \  End-Code
 
+0 [if]
   ???Code ?branch   ( f -- ) \ jump on f=0
       # 2 , ip add.w:q
       tos , tos tst.w   0= IF  -2 [ip] , ip mov.w:g   THEN
@@ -264,6 +273,8 @@ folgendes aus COLD noch klŠren:
       tos pop.w:g
       next,
   End-Code
+[then]
+
 
  \ memory access
   cfCode @        ( addr -- n ) \ read cell
@@ -358,7 +369,7 @@ folgendes aus COLD noch klŠren:
   End-Code
   
   cfCode xor      ( n1 n2 -- n3 ) \ logic
-    @PSP+,TOS xor.w
+    @PSP+ TOS xor.w
     next,
    End-Code
 
@@ -533,23 +544,27 @@ folgendes aus COLD noch klŠren:
 \ IRACL  .EQU R7 ; Result low word 
 \ IRACM  .EQU R8 ; Result high word 
 
-  ?!Code um*      ( u1 u2 -- ud ) \ unsigned multiply
+  mkCode um*      ( u1 u2 -- ud ) \ unsigned multiply
     \ IROP1 = TOS register
     @PSP R5 MOV     \ get u1, leave room on stack
     \ T.I. SIGNED MULTIPLY SUBROUTINE: TOS x R5 -> R8|R7
-    R7 CLR          \ 0 -> LSBs RESULT
-    R8 CLR          \ 0 -> MSBs RESULT
+
+\ CLR Emulation: MOV #0,dst
+    0# R7 MOV          \ 0 -> LSBs RESULT
+    0# R8 MOV          \ 0 -> MSBs RESULT
     \ UNSIGNED MULTIPLY AND ACCUMULATE SUBROUTINE:
     \ (TOS x R5) + R8|R7 -> R8|R7
-    R6 CLR          \ MSBs MULTIPLIER
+    0# R6 MOV          \ MSBs MULTIPLIER
     1# R9 MOV       \ BIT TEST REGISTER
 (b  R9 TOS BIT      \ TEST ACTUAL BIT
     (f JZ           \ IF 0: DO NOTHING
+
+0 [if] .s
        R5 R7 ADD    \ IF 1: ADD MULTIPLIER TO RESULT
        R6 R8 ADDC     
-    f) RLA R5 RLA   \ MULTIPLIER x 2
-       RLC R6 RLC     
-       RLA R9 RLA   \ NEXT BIT TO TEST
+    f) R5 RLA   \ MULTIPLIER x 2
+       R6 RLC     
+       R9 RLA   \ NEXT BIT TO TEST
 b)  JNC             \ IF BIT IN CARRY: FINISHED
         R7 0 (PSP) MOV  \ low result on stack
         R8 TOS MOV      \ high result in TOS
@@ -847,5 +862,5 @@ f)   W,TOS MOV
    : empty ( -- )  $2800 flash-off $2000 flash-off
        forth-wordlist ram-mirror + ram-start - @ forth-wordlist !
        normal-dp ram-mirror + ram-start - @ normal-dp ! $2000 flash-dp ! ;
-
+[then]
 
