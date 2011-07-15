@@ -1,205 +1,172 @@
 \ Emulated MSP430 instruction set 
-\ basic syntax only.
 
 
 
 \ ADC Emulation : ADDC #0,dst
-: ADC,   (1)  \ Add C to destination:   dst + C --> dst [ * * * * ] 
-    0 s#N  ADDC,  ; 
-: ADC.B, (1)  \ Add C to destination:   dst + C --> dst [ * * * * ] 
-    0 s#N  ADDC.B,  ; 
- ' ADC, alias ADC.W, 
+: ADC         \ Add C to destination:   dst + C --> dst [ * * * * ] 
+    0# swap  ADDC   ; 
+: ADC.B       \ Add C to destination:   dst + C --> dst [ * * * * ] 
+    0# swap  ADDC.B ; 
 
 
 
 \ BR Emulation : MOV src,PC 
-: BR,    (1)  \ Branch to destination:   src --> PC [ - - - - ] 
-    PC dRn MOV, ; 
- ' BR, alias BRANCH, 
+: BR          \ Branch to destination:   src --> PC [ - - - - ] 
+    PC MOV,  ;
+' BR alias BRANCH
 
 
-
-\ CLR Emulation: MOV #0,dst: CLR,   (1)  \ Clear destination:  0 --> dst [ - - - - ] 
-    0 s#N  MOV,  ; 
-: CLR.B, (1)  \ Clear destination:  0 --> dst [ - - - - ] 
-    0 s#N  MOV.B,  ; 
- ' CLR, alias CLR.W, 
+\ CLR Emulation: MOV #0,dst: CLR         \ Clear destination:  0 --> dst [ - - - - ] 
+    0# swap  MOV  ; 
+: CLR.B       \ Clear destination:  0 --> dst [ - - - - ] 
+    0# swap  MOV.B   ; 
 
 
 
 \ CLRC Emulation: BIC #1,SR 
-: CLRC, (1)   \ Clear C   0 --> C [ - - - 0 ] 
-    1 s#N  SR dRn  BIC, ; 
-
-' CLRC, alias CLRC 
+: CLRC        \ Clear C   0 --> C [ - - - 0 ] 
+    1# SR  BIC  ; 
 
 
 
 \ CLRN Emulation: BIC #4,SR 
-: CLRN, (1)   \ Clear N   0 --> N[ - 0 - - ] 
-    $4 s#N  SR dRn  BIC, ; 
-
-' CLRN, alias CLRN 
+: CLRN        \ Clear N   0 --> N[ - 0 - - ] 
+    4# SR  BIC  ; 
 
 
 
 \ CLRZ Emulation: BIC #2,SR 
-: CLRZ, (1)   \ Clear Z   0 --> Z[ - - 0 - ] 
-    $2 s#N  SR dRn  BIC, ; 
-
-' CLRZ, alias CLRZ 
+: CLRZ        \ Clear Z   0 --> Z[ - - 0 - ] 
+    2# SR  BIC  ; 
 
 
 
 \ DADC Emulation: DADD #0,dst
-: DADC,   (1) \ Add C decimally to destination:   dst + C --> dst   (decimally) [ * * * * ] 
-    0  s#N  DADD,  ; 
-: DADC.B, (1) \ Add C decimally to destination:   dst + C --> dst   (decimally) [ * * * * ] 
-    0 s#N  DADD.B,  ; 
- ' DADC, alias DADC.W, 
+: DADC        \ Add C decimally to destination:   dst + C --> dst   (decimally) [ * * * * ] 
+    0# swap  DADD   ; 
+: DADC.B      \ Add C decimally to destination:   dst + C --> dst   (decimally) [ * * * * ] 
+    0# swap  DADD.B   ; 
 
 
 
 \ DEC Emulation: SUB #1,dst 
-: DEC,   (1)  \ Decrement destination:  dst   - 1 --> dst [ * * * * ] 
-    1 s#N SUB,  ; 
-: DEC.B, (1)  \ Decrement destination:  dst   - 1 --> dst [ * * * * ] 
-    1 s#N  SUB.B,  ; 
- ' DEC, alias DEC.W, 
+: DEC         \ Decrement destination:  dst   - 1 --> dst [ * * * * ] 
+    1# swap SUB   ; 
+: DEC.B       \ Decrement destination:  dst   - 1 --> dst [ * * * * ] 
+    1# swap SUB.B   ; 
 
 
 
 \ DECD Emulation: SUB #2,dst 
-: DECD,   (1) \ Double-decrement destination:  dst   - 2 --> dst [ * * * * ] 
-    &2 s#N  SUB,  ; 
-: DECD.B, (1) \ Double-decrement destination:  dst   - 2 --> dst [ * * * * ] 
-    &2 s#N  SUB.B,  ; 
- ' DECD, alias DECD.W, 
+: DECD        \ Double-decrement destination:  dst   - 2 --> dst [ * * * * ] 
+    2# swap  SUB   ; 
+: DECD.B      \ Double-decrement destination:  dst   - 2 --> dst [ * * * * ] 
+    2# swap  SUB.B   ; 
 
 
 
 \ DINT Emulation: BIC #8,SR 
-: DINT,   (1)  \  Disable interrupts:  0 --> GIE [ - - - - ] 
-    &8 s#N  SR dRn BIC, ; 
-
-' DINT alias DINT
+: DINT         \  Disable interrupts:  0 --> GIE [ - - - - ] 
+    8# SR  BIC, ; 
 
 
 
 \ EINT Emulation: BIS #8,SR 
-: EINT,   (1)  \  Enable interrupts:  1 --> GIE[ - - - - ] 
-    &8 s#N  SR dRn BIS,  ; 
-
-' EINT, alias EINT 
+: EINT         \  Enable interrupts:  1 --> GIE[ - - - - ] 
+    8# SR  BIS   ; 
 
 
 
 \ INC Emulation: ADD #1,dst 
-: INC,    (1)  \ Increment destination:  dst +1 --> dst [ * * * * ] 
-    1 s#N  ADD,  ; 
-: INC.B,  (1)  \ Increment destination:  dst +1 --> dst [ * * * * ] 
-    1 s#N  ADD.B,  ; 
- ' INC, alias INC.W, 
+: INC         \ Increment destination:  dst +1 --> dst [ * * * * ] 
+    1# swap  ADD   ; 
+: INC.B        \ Increment destination:  dst +1 --> dst [ * * * * ] 
+    1# swap  ADD.B   ; 
 
 
 
 \ INCD Emulation: ADD #2,dst 
-: INCD,   (1) \ Double-increment destination:  dst+2 --> dst [ * * * * ] 
-    2 s#N  ADD,  ; 
-: INCD.B, (1) \ Double-increment destination:  dst+2 --> dst [ * * * * ] 
-    2 s#N  ADD.B, ; 
- ' INCD, alias INCD.W, 
+: INCD        \ Double-increment destination:  dst+2 --> dst [ * * * * ] 
+    2# swap  ADD   ; 
+: INCD.B,     \ Double-increment destination:  dst+2 --> dst [ * * * * ] 
+    2# swap  ADD.B  ; 
 
 
 
 \ INV Emulation: XOR #0FFFFh,dst 
-: INV,   (1)  \ Invert destination:  .not.dst --> dst [ * * * * ] 
-    $0FFFF s#N XOR,  ; 
-: INV.B, (1)  \ Invert destination:  .not.dst --> dst [ * * * * ] 
-    $0FFFF s#N XOR.B,  ; 
- ' INV, alias INV.W, 
+: INV         \ Invert destination:  .not.dst --> dst [ * * * * ] 
+    FFFF# swap  XOR.W   ; 
+: INV.B       \ Invert destination:  .not.dst --> dst [ * * * * ] 
+    FFFF# swap  XOR.B   ; 
 
 
 
 \ NOP Emulation: MOV #0, R3 
-: NOP,    (2)  \  No operation[ - - - - ] 
-     0 s#N R3 dRn  MOV,  ; 
-
-' NOP, alias NOP 
+: NOP          \  No operation[ - - - - ] 
+     0# R3  MOV   ; 
 
 
 
 \ POP Emulation: MOV @SP+,dst 
-: POP,   (2)  \ Pop item from stack to destination:   @SP --> dst, SP+2 --> SP [ - - - - ] 
-     SP s@Rn+  MOV,  ; 
-: POP.B, (2)  \ Pop item from stack to destination:   @SP --> dst, SP+2 --> SP [ - - - - ] 
-     SP s@Rn+  MOV,  ; 
- ' POP, alias POP.W, 
+: POP         \ Pop item from stack to destination:   @SP --> dst, SP+2 --> SP [ - - - - ] 
+     @SP+ swap  MOV   ; 
+: POP.B       \ Pop item from stack to destination:   @SP --> dst, SP+2 --> SP [ - - - - ] 
+     @SP+ swap  MOV.B ; 
 
 
 \ RET Emulation: MOV @SP+,PC
 : RET,        \ Return from subroutine: @SP --> PC, SP+2 --> SP [ - - - - ] 
-     SP s@Rn  PC dRn MOV, 
+     @SP+ PC  MOV   ;  
 
 
 
 \ RLA Emulation: ADD dst,dst 
-: RLA,   (2)  \ Rotate left arithmetically [ * * * * ] 
-    ADD,  ; 
-: RLA.B, (2)  \ Rotate left arithmetically [ * * * * ] 
-    ADD.B,  ; 
- ' RLA, alias RLA.W, 
+: RLA ( exp --- )        \ Rotate left arithmetically [ * * * * ] 
+    dup ADD   ; 
+: RLA.B ( exp --- )      \ Rotate left arithmetically [ * * * * ] 
+    dup ADD.B   ; 
 
 
 
 \ RLC Emulation: ADDC dst,dst 
-: RLC,   (2)  \ Rotate left through C [ * * * * ] 
-    ADDC,  ; 
-: RLC.B, (2)  \ Rotate left through C [ * * * * ] 
-    ADDC.B,  ; 
- ' RLC, alias RLC.W, 
+: RLC ( exp --- )        \ Rotate left through C [ * * * * ] 
+    dup ADDC   ; 
+: RLC.B ( exp --- )      \ Rotate left through C [ * * * * ] 
+    dup ADDC.B   ; 
 
 
 
 \ SBC Emulation: SUBC #0,dst 
-: SBC,   (2)  \ Subtract not(C) from destination:  dst + 0FFFFh + C --> dst [ * * * * ] 
-    0 s#N  SUBC,  ; 
-: SBC.B, (2)  \ Subtract not(C) from destination:  dst + 0FFFFh + C --> dst [ * * * * ] 
-    0 s#N  SUBC,  ; 
- ' SBC, alias SBC.W, 
+: SBC         \ Subtract not(C) from destination:  dst + 0FFFFh + C --> dst [ * * * * ] 
+    0# swap  SUBC   ; 
+: SBC.B       \ Subtract not(C) from destination:  dst + 0FFFFh + C --> dst [ * * * * ] 
+    0# swap  SUBC,  ; 
 
 
 
 \ SETC Emulation: BIS #1,SR 
-: SETC, (2)  ( -- )   \ Set C 1 --> C [ - - - 1 ] 
-    1 s#N  SR dRn  BIS,  ; 
-
-' SETC, alias SETC 
+: SETC       ( -- )   \ Set C 1 --> C [ - - - 1 ] 
+    1# SR  BIS   ; 
 
 
 
 \ SETN Emulation: BIS #4,SR 
-: SETN, (2)  ( -- )   \ Set N 1 --> N [ - 1 - - ] 
-    &4 s#N  SR dRn  BIS,  ; 
-
-' SETN, alias SETN 
+: SETN       ( -- )   \ Set N 1 --> N [ - 1 - - ] 
+    4# SR  BIS  ; 
 
 
 
 \ SETZ Emulation: BIS #2,SR 
-: SETZ, (2)  ( -- )   \ Set Z 1 --> C [ - - 1 - ] 
-    &2 s#N  SR dRn  BIS,  ; 
-
-' SETZ, alias SETZ 
+: SETZ      ( -- )   \ Set Z 1 --> C [ - - 1 - ] 
+    2# SR  BIS  ; 
 
 
 
 \ TST Emulation: CMP #0,dst 
-: TST,   (2)  \ Test destination:  dst + 0FFFFh + 1 [ 0 * * 1 ] 
-    0 s#N  CMP,  ; 
-: TST.B, (2)  \ Test destination:  dst + 0FFFFh + 1 [ 0 * * 1 ] 
-    0  s#N  CMP.B,  ; 
- ' TST, alias TST.W, 
+: TST        \ Test destination:  dst + 0FFFFh + 1 [ 0 * * 1 ] 
+    0# swap  CMP   ; 
+: TST.B       \ Test destination:  dst + 0FFFFh + 1 [ 0 * * 1 ] 
+    0# swap  CMP.B   ; 
 
 
 

@@ -436,7 +436,7 @@ variable nops   variable errnops
 
 
 include syntaxlayer.fs ( secondary syntax layer to ease coding) 
-\ include emuset.fs 
+include emuset.fs 
 
 
  HERE  SWAP -  .( \ Length of MSP430-Assembler: ) . .( Bytes ) CR
