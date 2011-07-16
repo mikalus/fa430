@@ -382,15 +382,46 @@ $3C00 mneIII: JMP, ( adr -- )   \ Jump PC + 2 * offset --> PC [ - - - - ]
 
 \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 
 
-true [if] ( verification process ) 
-
 \ -- label tabel
 &10 constant maxlabels 
 variable (lbl) maxlabels cells allot  
 : >label    ( n -- )  there swap cell * (lbl) + ! ; 
-: label>    ( n -- addr )  cell * (lbl) + @ ;
+: label>    ( n -- addr )  cell * (lbl) + @ ; 
+
+: L0: 0 >label ; 
+: L1: 1 >label ; 
+: L2: 2 >label ; 
+: L3: 3 >label ; 
+: L4: 4 >label ; 
+: L5: 5 >label ; 
+: L6: 6 >label ; 
+: L7: 7 >label ; 
+: L8: 8 >label ; 
+: L9: 9 >label ; 
+
+: L0  0 label> ; 
+: L1  1 label> ; 
+: L2  2 label> ; 
+: L3  3 label> ; 
+: L4  4 label> ; 
+: L5  5 label> ; 
+: L6  6 label> ; 
+: L7  7 label> ; 
+: L8  8 label> ; 
+: L9  9 label> ; 
+
+: solve-forward  ( adr -- ) >r  r@ offsetIIIforward  r@ X_@  or  r> X_! ;
+' solve-forward alias >>> 
+\ forward jump:   L0: 000 Jxx  ...  L0 >>>  ...
+\ backward jump:  L0:  ...  L0 Jxx  ...
+
 : .labels   ( -- )   ." labels" cr maxlabels 0 do i . i label> . cr loop ; 
 : clrlabels ( -- )   maxlabels 0 do i >label loop ; 
+
+
+
+
+true [if] ( verification process ) 
 
 variable nops   variable errnops
 : (.lst) ( adr n  -- adr n ) \ list last compiled instruction. 
@@ -421,22 +452,11 @@ variable nops   variable errnops
 
 [then]
 
-\ -- solve forward jump: (f jxx,  ...  f) 
-: (f  ( -- adr mark there ) there $1122 over 2 + ; 
-: f)  ( adr mark -- ) 
-  $1122 = if >r  r@ offsetIIIforward  r@ X_@  or  r> X_!   
-          else c" expected (f " c(abort") then ; 
-
-\ -- solve backward jump:  (b  ....  b) jxx, 
-: (b  ( -- adr mark) there $3344 ; 
-: b)  ( adr mark -- )  $3344 = if else c" expected b) " c(abort") then ; 
-
-
-
 
 
 include syntaxlayer.fs ( secondary syntax layer to ease coding) 
 include emuset.fs 
+
 
 
  HERE  SWAP -  .( \ Length of MSP430-Assembler: ) . .( Bytes ) CR
