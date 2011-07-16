@@ -608,21 +608,28 @@ L4 >>>  ; Error indication in C
     next,
    End-Code
 
+clrlabels
   cfCode lshift   ( n1 n2 -- n3 ) \ shift n1 left n2 bits
     @PSP+ W MOV
     $1F N# TOS AND       ; no need to shift more than 16
-(f  JZ
-      (b  W W ADD   #1 TOS SUB  b) JNZ
-f)  W TOS MOV
+L0: 000 JZ
+L1: W W ADD  
+    #1 TOS SUB
+L1  JNZ
+L0 >>> W TOS MOV
     next,
    End-Code
 
+clrlabels
   cfCode rshift   ( n1 n2 -- n3 ) \ shift n1 right n2 bits
      @PSP+ W MOV
      $1F N# TOS AND       ; no need to shift more than 16
-(f   JZ
-       (b  CLRC   W RRC   #1 TOS SUB  b) JNZ
-f)   W,TOS MOV
+L0:  000 JZ
+L1:  CLRC   
+     W RRC   
+     #1 TOS SUB  
+L1  JNZ
+L0 >>>  W,TOS MOV
      next,
    End-Code
 
