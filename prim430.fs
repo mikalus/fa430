@@ -39,23 +39,15 @@
 
 \ MSP430 is 1s complement signed nummers? 
 
-' code alias cfCode
-' code alias mkCode
-' :    alias cf:
+' Code alias cfCode 
+' Code alias mkCode 
 
 
+start-macros
 
-\ * Memory 
-\ **************************************************************
-
-
-\ << start-macros
-
- \ hfs wichtig, damit der erste Befehl richtig compiliert wird
-\ <<  reset  \ hfs
-
- \ system depending macros
-  cf: next, 
+    \ inline next. 
+    \ A jump to a central next takes 2 words too, but is slower. 
+    : next,      
     @IP+ W  MOV
     @W+  PC MOV ; 
 
@@ -66,10 +58,13 @@
     : loadtos
       @PSP+ TOS MOV ;
 
-\ << end-macros
+end-macros
 
 
-0 [if]
+
+\ * Memory 
+\ **************************************************************
+
   unlock
     $00000 $1FFFF region address-space
 \    $0FFFF $0FFE0  ( inertupt vector tabel )
@@ -111,20 +106,20 @@ folgendes aus COLD noch klŠren:
     I fset
   next,
   End-Label
-[then]
+
 
 
 \ ==============================================================
 \ GFORTH minimal primitive set
 \ ==============================================================
 
+reset-mode# 
 
  \ inner interpreter
 
   align
 
   cfCode :docol
-\    '2 dout,                    \ only for debugging
     ip push
     w ip mov
     next,
@@ -133,7 +128,6 @@ folgendes aus COLD noch klŠren:
   align
 
   cfCode :docon
-\    '2 dout,                    \ only for debugging
     2# PSP sub
     tos 0 (psp) mov
     @w tos mov    
@@ -141,7 +135,7 @@ folgendes aus COLD noch klŠren:
   End-Code
 
   align
-0 [if]
+
   ???Code: :dovalue
 \    '2 dout,                    \ only for debugging
     tos push.w:g
@@ -186,11 +180,9 @@ folgendes aus COLD noch klŠren:
     w , tos mov.w:g
     next,
   End-Code
-[then]
 
 \ program flow
   mkCode ;s       ( -- ) \ exit colon definition
-\    '; dout,                    \ only for debugging
     @RSP+ IP mov    \ pop old IP from return stack
     next,
   End-Code
@@ -209,7 +201,6 @@ folgendes aus COLD noch klŠren:
 \    next1,
 \  End-Code
 
-0 [if]
   ???Code ?branch   ( f -- ) \ jump on f=0
       # 2 , ip add.w:q
       tos , tos tst.w   0= IF  -2 [ip] , ip mov.w:g   THEN
@@ -273,7 +264,7 @@ folgendes aus COLD noch klŠren:
       tos pop.w:g
       next,
   End-Code
-[then]
+
 
 
  \ memory access
@@ -537,38 +528,32 @@ folgendes aus COLD noch klŠren:
  \ arithmetic
 
 \ Adopted from section 5.1.1 of MSP430 Family Application Reports. 
-\ IRBT   .EQU R9 ; Bit test register MPY 
-\ IROP1  .EQU R4 ; First operand 
-\ IROP2L .EQU R5 ; Second operand low word 
-\ IROP2M .EQU R6 ; Second operand high word 
-\ IRACL  .EQU R7 ; Result low word 
-\ IRACM  .EQU R8 ; Result high word 
+' TOS alias IROP1 \ First operand 
+' R5 alias IROP2L \ Second operand low word 
+' R6 alias IROP2M \ Second operand high word 
+' R7 alias IRACL  \ Result low word 
+' R8 alias IRACM  \ Result high word 
+' R9 alias IRBT   \ Bit test register MPY 
 
   mkCode um*      ( u1 u2 -- ud ) \ unsigned multiply
-    \ IROP1 = TOS register
-    @PSP R5 MOV     \ get u1, leave room on stack
+    \ u2 ist schon im TOS 
+    @PSP IROP2L MOV     \ get u1, leave room on stack
     \ T.I. SIGNED MULTIPLY SUBROUTINE: TOS x R5 -> R8|R7
-
-\ CLR Emulation: MOV #0,dst
-    0# R7 MOV          \ 0 -> LSBs RESULT
-    0# R8 MOV          \ 0 -> MSBs RESULT
-    \ UNSIGNED MULTIPLY AND ACCUMULATE SUBROUTINE:
-    \ (TOS x R5) + R8|R7 -> R8|R7
-    0# R6 MOV          \ MSBs MULTIPLIER
-    1# R9 MOV       \ BIT TEST REGISTER
-(b  R9 TOS BIT      \ TEST ACTUAL BIT
-    (f JZ           \ IF 0: DO NOTHING
-
-0 [if] .s
-       R5 R7 ADD    \ IF 1: ADD MULTIPLIER TO RESULT
-       R6 R8 ADDC     
-    f) R5 RLA   \ MULTIPLIER x 2
-       R6 RLC     
-       R9 RLA   \ NEXT BIT TO TEST
-b)  JNC             \ IF BIT IN CARRY: FINISHED
-        R7 0 (PSP) MOV  \ low result on stack
-        R8 TOS MOV      \ high result in TOS
-      next,
+    IRACL  CLR 
+    IRACM  CLR 
+    IROP2M CLR 
+    1# IRBT MOV           \ BIT TEST REGISTER
+L2:   IRBT IROP1 BIT   \ TEST ACTUAL BIT
+L1: 000 JZ           \ IF 0: DO NOTHING
+          IROP2L IRACL ADD    \ IF 1: ADD MULTIPLIER TO RESULT
+          IROP2M IRACM ADDC 
+L1 >>>  IROP2L RLA       \ MULTIPLIER x 2
+        IROP2M RLC 
+        IRBT RLA       \ NEXT BIT TO TEST
+L2    JNC          \ IF BIT IN CARRY: FINISHED
+    IRACL 0 (PSP) MOV   \ low result on stack
+    IRACM TOS MOV       \ high result in TOS
+    next,
    End-Code
 
   ?!Code m*      ( u1 u2 -- ud ) \ unsigned multiply
@@ -582,15 +567,30 @@ b)  JNC             \ IF BIT IN CARRY: FINISHED
       next,
    End-Code
 
-  ?!Code um/mod   ( ud u -- r q ) \ unsiged divide
-      rp , r3 mov.w:g
-      tos , r1 mov.w:g
-      r2 pop.w:g
-      tos pop.w:g
-      r3r1 divu.w
-      r2 push.w:g
-      r3 , rp mov.w:g
-      r3 , r3 xor.w
+clrlabels
+  mkCode um/mod   ( ud u -- r q ) \ unsiged divide 
+    \ u2 ist schon im TOS 
+        @PSP+ IROP2M MOV   ; get ud hi
+        @PSP  IROP2L MOV   ; get ud lo, leave room on stack
+DIVIDE: IRACL CLR  
+        &17 #N IRBT  MOV ; INITIALIZE LOOP COUNTER
+L1:     IROP1 IROP2M  CMP
+L2:     000 JLO  
+        IROP1 IROP2M SUB 
+L2 >>>  IRACL RLC
+L4:     000 JC      ; Error: result > 16 bits
+        IRBT DEC    ; Decrement loop counter
+L3:     000 JZ      ; Is 0: terminate w/o error
+        IROP2L RLA 
+        IROP2M RLC 
+L1      JNC 
+        IROP1 IROP2M SUB 
+        SETC
+L2      JMP
+L3 >>>  CLRC        ; No error, C = 0
+L4 >>>  ; Error indication in C
+        IROP2M 0 (PSP) MOV  ; remainder on stack
+        IRACL TOS MOV       ; quotient in TOS
       next,
    End-Code
 
@@ -862,5 +862,6 @@ f)   W,TOS MOV
    : empty ( -- )  $2800 flash-off $2000 flash-off
        forth-wordlist ram-mirror + ram-start - @ forth-wordlist !
        normal-dp ram-mirror + ram-start - @ normal-dp ! $2000 flash-dp ! ;
-[then]
+
+\ finis
 
