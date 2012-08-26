@@ -109,7 +109,7 @@ testing [if]  ' setloca is [op]  [else]  ' nop is [op]  [then]
 \ *** Addressing modes
 
 \ Adressing modes patch opcode befor opcode is compiled. 
-\ They patch the As or As bits and source and/or register bits.
+\ They patch the As or Ad bits and source and/or register bits.
 
 : >sreg ( rn -- ) %1111 and 8 lshift mode or   to mode ; 
 : >dreg ( rn -- ) %1111 and          mode or   to mode ; 
@@ -127,8 +127,8 @@ testing [if]  ' setloca is [op]  [else]  ' nop is [op]  [then]
 \ clear bit7         %1111111101111111 and 
 
 : 00As ( -- )   mode %1111111111001111 and   to mode ; 
-: 01As ( -- )   mode %0000000000010000 or    to mode ; 
-: 10As ( -- )   mode %0000000000100000 or    to mode ; 
+: 01As ( -- )   00As mode %0000000000010000 or    to mode ; 
+: 10As ( -- )   00As mode %0000000000100000 or    to mode ; 
 : 11As ( -- )   mode %0000000000110000 or    to mode ; 
 :  0Ad ( -- )   mode %1111111101111111 and   to mode ;
 :  1Ad ( -- )   mode %0000000010000000 or    to mode ; 
