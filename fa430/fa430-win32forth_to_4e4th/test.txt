@@ -1,0 +1,5 @@
+msp430code test
+  r4 r5 mov   r4 r5 mov   r6 r7 mov
+  @sp+ pc mov
+  next
+  end-code
