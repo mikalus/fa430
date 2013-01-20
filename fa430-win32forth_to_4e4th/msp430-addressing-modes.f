@@ -26,7 +26,10 @@
 :  0Ad ( -- )   mode %1111111101111111 and   to mode ;
 :  1Ad ( -- )   mode %0000000010000000 or    to mode ;
 
+
+
 \ -- Seven addressing modes for the source operand.
+
 \ %0 = register mode Rn - As and Ad bits.
 : sRn   ( rn -- )  >sreg  reset-src   00As ;
 :  Rn   ( rn -- )  >dreg  reset-src   00As ;
@@ -84,15 +87,15 @@
   R3  11 0FFFFh 1, word processing
 
   To take advantage of constant gererators CG1 or CG2 use constant words.
-  e.g.:  2# 5 dRn mov,   ( instead of 2 s#N 5 dRn mov,  )
+  e.g.:  2## 5 dRn mov,   ( instead of 2 s#N 5 dRn mov,  )
 [then]
 
-: 0#    ( -- ) 3 >sreg  reset-src  00As ;
-: 1#    ( -- ) 3 >sreg  reset-src  01As ;
-: 2#    ( -- ) 3 >sreg  reset-src  10As ;
-: 4#    ( -- ) 2 >sreg  reset-src  10As ;
-: 8#    ( -- ) 2 >sreg  reset-src  11As ;
-: ffff# ( -- ) 3 >sreg  reset-src  11As ;
+: 0##    ( -- ) 3 >sreg  reset-src  00As ;
+: 1##    ( -- ) 3 >sreg  reset-src  01As ;
+: 2##    ( -- ) 3 >sreg  reset-src  10As ;
+: 4##    ( -- ) 2 >sreg  reset-src  10As ;
+: 8##    ( -- ) 2 >sreg  reset-src  11As ;
+: ffff## ( -- ) 3 >sreg  reset-src  11As ;
 
 
 \ -- Four addressing modes for the destination operand

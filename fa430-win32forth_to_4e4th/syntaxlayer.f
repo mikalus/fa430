@@ -2,7 +2,40 @@
 
 
 
-\ *** adressing mode modifiers
+\ ****** Make a smarter Notation for register adressing modes 
+
+\   MSP430x2xx Family User' s Guide, Page 50, 3.3 Addressing Modes 
+\   The syntax description is given in Table 3-3, "Source/Destination Operand Addressing Modes" 
+
+\   The modes are: 
+\     Register mode           Rn      Register contents are operand 
+\     Indexed mode            X(Rn)   (Rn + X) points to the operand. X is stored in the next word. 
+\     Symbolic mode           ADDR    (PC + X) points to the operand. X is stored in the next word. 
+                                      Indexed mode X(PC) is used. 
+\     Absolute mode           &ADDR   The word following the instruction contains the absolute address. 
+                                      Indexed mode X(SR) is used. 
+\     Indirect register mode  @Rn     Rn is used as a pointer to the operand. 
+\     Indirect autoincrement  @Rn+    Rn is used as a pointer to the operand. 
+                                      Rn is incremented afterwards by 1 for .B instructions and by 2 for .W instructions. 
+\     Immediate mode          #N      The word following the instruction contains the immediate constant N. 
+                                      Indirect autoincrement mode @PC+ is used. 
+
+
+\   Now lets turn this into a notation.
+
+    ASSEMBLER  FORTH
+1.  Rn         rn         ( rn -- )   \ register# is on stack, mode# is set to 1 
+2.  x(Rn)      x (rn)     ( x rn -- ) \ x and register# are on stack, mode# is set to 2 
+3.  ADDR       a          ( a -- )    \ adr is on stack; default mode# = 3 
+4.  &ADDR      a &a       ( a -- )    \ adr is on stack, mode# is set to 4 
+5.  @Rn        @rn        ( rn -- )   \ register# is on stack, mode# is set to 5 
+6.  @Rn+       @rn+       ( rn -- )   \ register# is on stack, mode# is set to 6 
+7.  #n         n #n       ( n -- )    \ constant is on stack, mode# is set to 7 
+\ All seven are aplicable to source, 1..4 to destination only.
+
+
+
+\ *** Here we go:  Definig 7 modes. 
 
 $33 value mode#
 : reset-mode#  $33 to mode# ;
@@ -21,12 +54,19 @@ $33 value mode#
 \ All seven are aplicable to source, 1..4 to destination only.
 
 
+
+\ *** Now we do register names, knowing their mode. 
+
 \ The CPU incorporates sixteen 16-bit registers R0 ... R15
 \ R0, R1, R2, and R3 have dedicated functions.
 \ R4 to R15 are general pupose registers.
 \ Rn ( -- n ) ( set mode value too)
 
-\ 1. mode for all registers
+
+
+\ 1.   Register mode           Rn       Make a name for each register. 
+\ Function: Put register# on stack, set mode# to 1. 
+
 : R0 0 m1 ;     ' R0 alias PC  \ program counter
 : R1 1 m1 ;     ' R1 alias SP  \ stack pointer
 : R2 2 m1 ;     ' R2 alias SR  \ status register
@@ -54,7 +94,10 @@ $33 value mode#
 ' R7 alias TOS \ top of (parameter) stack
 
 
-\ 2. mode for all registers
+
+\ 2.   Indexed mode        x (Rn)     Make a name for each register. 
+\ Function: x is on stack, put register# on stack, set mode# to 2. 
+
 : (R0) 0 m2 ;     ' (R0) alias (PC)  \ program counter
 : (R1) 1 m2 ;     ' (R1) alias (SP)  \ stack ponter
 : (R2) 2 m2 ;     ' (R2) alias (SR)  \ status register
@@ -79,12 +122,22 @@ $33 value mode#
 ' (R6) alias (W)   \ working register
 ' (R7) alias (TOS) \ top of (parameter) stack
 
-\ 3. mode is intrinsic mode, no modifier.
 
-\ 4. mode
+
+\ 3.   Symbolic mode            a         This mode is default, no modifier. 
+\ Function: Address a is on stack, mode# is 3. 
+
+
+
+\ 4.   Absolute mode            a &a      Make a mode modifier. 
+\ Function: Address a is on stack and stays unchanged. &a sets mode# to 4. 
   ' m4 alias &A ( addr -- addr )
 
-\ 5. mode for all registers
+
+
+\ 5.   Indirect register mode   @rn       Make a name for each register. 
+\ Function: Put register# on stack, set mode# to 5. 
+
 : @R0 0 m5 ;     ' @R0 alias @PC  \ program counter
 : @R1 1 m5 ;     ' @R1 alias @SP  \ stack ponter
 : @R2 2 m5 ;     ' @R2 alias @SR  \ status register
@@ -110,7 +163,10 @@ $33 value mode#
 ' @R7 alias @TOS \ top of (parameter) stack
 
 
-\ 6. mode for all registers
+
+\ 6.   Indirect autoincrement  @rn+       Make a name for each register. 
+\ Function: Put register# on stack, set mode# to 1. 
+
 : @R0+ 0 m6 ;     ' @R0+ alias @PC+  \ program counter
 : @R1+ 1 m6 ;     ' @R1+ alias @SP+  \ stack ponter
 : @R2+ 2 m6 ;     ' @R2+ alias @SR+  \ status register
@@ -135,10 +191,16 @@ $33 value mode#
 ' @R6+ alias @W+   \ working register
 ' @R7+ alias @TOS+ \ top of (parameter) stack
 
-\ 7. mode
+
+
+\ 7.   Immediate mode          n n#    Make mode modifier.
+\ Function: Constant n is on stack, mode# is set to 7. 
+
   ' m7 alias #N ( n -- n )
 
 
+
+\ ****** Here are the mnemonics, that use the smarter adressing mode notation. 
 
 \ *** Double-Operand Instructions (Format I)
 
@@ -204,7 +266,7 @@ $33 value mode#
 
 
 
-\ Single-Operand INstructions ( Format II )
+\ *** Single-Operand Instructions ( Format II )
 
 : modeII ( src | x src -- )
     mode# $F and
