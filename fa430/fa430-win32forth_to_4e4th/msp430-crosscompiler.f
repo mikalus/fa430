@@ -1,17 +1,21 @@
+
+: upper 2drop ;  \ gforth compatibility
+
+
 \ MSP cross compiler
 \ Compile the code for the target provisionally in host memory
 \ END_CODE reads this memory to generate source for the target MCU
 
-: HEX.  ( n -- ) base @ r>   hex u.   r> base ! ;
+: HEX.  ( n -- ) base @ >r   hex u.   r> base ! ;
 
 variable tdp     : there  tdp @ ;
 
 there value loca  \ last opcode address. ( .lst .chk   gesetzt mit [op] )
-: setloca  ( -- )    there to loca ; ( startcode, op, )
+: setloca  ( -- )    there to loca ; 
 
 
 create         tstart $3F00 allot  here constant tend    \ 16Kbyte
-: tclear       tstart tend over - 0 fill   tstart tdp !   setloca ;   tclear
+: tclear       tstart tend over - $FF fill   tstart tdp !   setloca ;   tclear
 
 defer [op]
 

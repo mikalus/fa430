@@ -170,7 +170,7 @@
     0# swap  CMP.B   ;
 
 
-\ 4e4th macros
+\ 4e4th macro
 : NEXT  ( -- )   @ip+ w  mov   @w+ pc mov  ;
 
 
