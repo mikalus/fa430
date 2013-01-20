@@ -28,7 +28,7 @@
 
 \ -- Seven addressing modes for the source operand.
 \ %0 = register mode Rn - As and Ad bits.
-: sRn   ( rn -- )  >sreg  reset-src    00As ;
+: sRn   ( rn -- )  >sreg  reset-src   00As ;
 :  Rn   ( rn -- )  >dreg  reset-src   00As ;
 
 \ %1 = indexed mode X(Rn) - As and Ad bits.
@@ -73,7 +73,7 @@
   One word less is compiled if CG1 or CG2 can be used as constant.
   Table:
   CG1 As
-  R2  00 Ð Ð Ð Ð Ð Register mode
+  R2  00 Register mode
   R2  01 (0) Absolute address mode
   R2  10 00004h +4, bit processing
   R2  11 00008h +8, bit processing

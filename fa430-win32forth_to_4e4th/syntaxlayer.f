@@ -18,12 +18,12 @@ $33 value mode#
 : m5 ( -- )       5 accumulate-mode ; \ @Rn
 : m6 ( -- )       6 accumulate-mode ; \ @Rn+
 : m7 ( -- )       7 accumulate-mode ; \ #N
-\ All seven are aplicable to source, only 1..4 to destination.
+\ All seven are aplicable to source, 1..4 to destination only.
 
 
 \ The CPU incorporates sixteen 16-bit registers R0 ... R15
 \ R0, R1, R2, and R3 have dedicated functions.
-\ R4 to R15 are working registers for general use.
+\ R4 to R15 are general pupose registers.
 \ Rn ( -- n ) ( set mode value too)
 
 \ 1. mode for all registers

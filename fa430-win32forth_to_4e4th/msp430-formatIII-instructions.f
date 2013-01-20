@@ -25,7 +25,7 @@
 \ Assembler example: JMP label
 \ Forth: label JMP,
 
-: s>10 ( n -- n10 ) \ convert single precission to 10bit 2-complement.
+: s>10 ( n -- n10 ) \ convert single precision to 10bit 2-complement.
     dup %1111111111 and swap 0< if %1000000000 or then ;
 
 : offsetIIIforward ( adr -- ) there swap - 2/ 1- s>10 ;
