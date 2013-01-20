@@ -4,6 +4,14 @@
 \ Bits: | 15 14 13 | 12 11 10 | 9 8 7 6 5 4 3 2 1 0 |
 \       |  Op-code |    C     |   10-Bit PC Offset  |
 
+\   statusbits: [ V N Z C ]
+\   * The status bit is affected
+\   Ð The status bit is not affected
+\   0 The status bit is cleared
+\   1 The status bit is set
+
+
+
 : checkIII ( opcode -- )
   cr ." formatIII is:"
   cr ." CCCCCC=Op-Code, ooooooooo=offset."
