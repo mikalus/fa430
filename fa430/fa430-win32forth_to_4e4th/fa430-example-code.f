@@ -21,7 +21,6 @@ MSP430CODE XSWAP    ( x1 x2 -- x2 x1 )   \ swap top two items
         NEXT
 END-CODE
 
-
 MSP430CODE XOVER   ( x1 x2 -- x1 x2 x1 )  \ per stack diagram
         @PSP W       MOV
         #2 PSP       SUB
@@ -29,7 +28,6 @@ MSP430CODE XOVER   ( x1 x2 -- x1 x2 x1 )  \ per stack diagram
         W TOS        MOV
         NEXT
 END-CODE
-
 
 MSP430CODE XROT   ( x1 x2 x3 -- x2 x3 x1 )  \ per stack diagram
         @PSP W       MOV
@@ -39,57 +37,15 @@ MSP430CODE XROT   ( x1 x2 x3 -- x2 x3 x1 )  \ per stack diagram
         NEXT
 END-CODE
 
-
 MSP430CODE XNIP   ( x1 x2 -- x2 )          \ per stack diagram
-        2# PSP       ADD
+        2# PSP       ADD  ????
         NEXT
 END-CODE
 
-
-
 \ \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-\ When you include fa430-example-code.f
-\ the output should look like:
-\
-\ MSP430CODE XDUP
-\ 8014 i, FC7C i, 4784 i, 0 i, 4536 i, 4630 i,
-\ END-CODE
 
-\ IAR:
-\ 2483 8447 0000  3645  3046
-
-\ 4e4th:
-\ ' dup 10 dump
-\ D8EE   F0 D8 24 83 84 47  0  0 36 45 30 46 E9 D8 FF  4  pX$  G  6E0FiX~ $10ok
-\              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-
-\
-\ MSP430CODE XDROP
-\ 4437 i, 4536 i, 4630 i,
-\ END-CODE
-\
-\ MSP430CODE XSWAP
-\ 4426 i, 4784 i, 0 i, 4607 i, 4536 i, 4630 i,
-\ END-CODE
-\
-\ MSP430CODE XOVER
-\ 4426 i, 8014 i, FC7A i, 4784 i, 0 i, 4607 i, 4536 i,
-\ 4630 i,
-\ END-CODE
-\
-\ MSP430CODE XROT
-\ 4426 i, 4784 i, 0 i, 4417 i, 2 i, 4684 i, 2 i,
-\ 4536 i, 4630 i,
-\ END-CODE
-\
-\ MSP430CODE XNIP
-\ 5014 i, FC7C i, 4536 i, 4630 i,
-\ END-CODE
 \
 \ Copy&paste this source code to 4e4th then.
-
-
 
 \ \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 \ This is a copy of the original code from IAR; core430G2553.s34
@@ -288,6 +244,72 @@ And IAR compiled this:
     219.3  000176                      ENDM
 
 
-\ \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+\ Lets verify the output. 
+\
+\ DUP in IAR Assembler:
+\ 2483 8447 0000 3645 3046
+
+\ MSP430CODE XDUP
+\ 8014 i, FC7C i, 4784 i, 0 i, 4536 i, 4630 i,
+\ END-CODE
+
+\ 8014 i, FC7C i, 4784 i, 0 i, 4536 i, 4630 i,
+\ ^^^^    ^^^^ <--WRONG
+
+
+
+\ DROP in IAR Assembler: 
+\ 3744  3645  3046  
+
+\ MSP430CODE XDROP
+\ 4437 i, 4536 i, 4630 i,    <--- this is ok. 
+\ END-CODE
+
+
+
+\ SWAP in IAR Assembler: 
+\ 2644 8447 0000 0746 3645 3046 
+\
+\ MSP430CODE XSWAP
+\ 4426 i, 4784 i, 0 i, 4607 i, 4536 i, 4630 i,    <--- this is ok. 
+\ END-CODE
+
+
+
+
+
+\ OVER in IAR Assembler:
+\ 2644 2483 8447 0000 0746   3645 3046
+\
+\ MSP430CODE XOVER
+\ 4426 i, 8014 i, FC7A i, 4784 i, 0 i, 4607 i, 
+\         ^^^^    ^^^^
+\ 4536 i, 4630 i,
+\ END-CODE
+
+
+
+\ ROT in IAR Assembler:
+\ 2644 8447 0000 1744 0200 8446 0200 
+\ 3645 3046 
+
+\ MSP430CODE XROT
+\ 4426 i, 4784 i, 0 i, 4417 i, 2 i, 4684 i, 2 i,    <--- this is ok. 
+\ 4536 i, 4630 i,
+\ END-CODE
+
+\ This is ok.
+
+
+
+\ NIP in IAR Assembler: 
+\ 2453 3645 3046
+
+\ MSP430CODE XNIP
+\ 5014 i, FC7C i, 4536 i, 4630 i,
+\ ^^^^    ^^^^
+\ END-CODE
+
+
 
 ( finis)
