@@ -3,34 +3,34 @@
 
 
 \ ****** Make a smarter Notation for register adressing modes 
-
+\ 
 \   MSP430x2xx Family User' s Guide, Page 50, 3.3 Addressing Modes 
 \   The syntax description is given in Table 3-3, "Source/Destination Operand Addressing Modes" 
-
+\ 
 \   The modes are: 
 \     Register mode           Rn      Register contents are operand 
 \     Indexed mode            X(Rn)   (Rn + X) points to the operand. X is stored in the next word. 
 \     Symbolic mode           ADDR    (PC + X) points to the operand. X is stored in the next word. 
-                                      Indexed mode X(PC) is used. 
+\                                     Indexed mode X(PC) is used. 
 \     Absolute mode           &ADDR   The word following the instruction contains the absolute address. 
-                                      Indexed mode X(SR) is used. 
+\                                     Indexed mode X(SR) is used. 
 \     Indirect register mode  @Rn     Rn is used as a pointer to the operand. 
 \     Indirect autoincrement  @Rn+    Rn is used as a pointer to the operand. 
-                                      Rn is incremented afterwards by 1 for .B instructions and by 2 for .W instructions. 
+\                                     Rn is incremented afterwards by 1 for .B instructions and by 2 for .W instructions. 
 \     Immediate mode          #N      The word following the instruction contains the immediate constant N. 
-                                      Indirect autoincrement mode @PC+ is used. 
-
-
+\                                     Indirect autoincrement mode @PC+ is used. 
+\ 
+\ 
 \   Now lets turn this into a notation.
-
-    ASSEMBLER  FORTH
-1.  Rn         rn         ( rn -- )   \ register# is on stack, mode# is set to 1 
-2.  x(Rn)      x (rn)     ( x rn -- ) \ x and register# are on stack, mode# is set to 2 
-3.  ADDR       a          ( a -- )    \ adr is on stack; default mode# = 3 
-4.  &ADDR      a &a       ( a -- )    \ adr is on stack, mode# is set to 4 
-5.  @Rn        @rn        ( rn -- )   \ register# is on stack, mode# is set to 5 
-6.  @Rn+       @rn+       ( rn -- )   \ register# is on stack, mode# is set to 6 
-7.  #n         n #n       ( n -- )    \ constant is on stack, mode# is set to 7 
+\ 
+\     ASSEMBLER  FORTH
+\ 1.  Rn         rn         ( rn -- )   \ register# is on stack, mode# is set to 1 
+\ 2.  x(Rn)      x (rn)     ( x rn -- ) \ x and register# are on stack, mode# is set to 2 
+\ 3.  ADDR       a          ( a -- )    \ adr is on stack; default mode# = 3 
+\ 4.  &ADDR      a &a       ( a -- )    \ adr is on stack, mode# is set to 4 
+\ 5.  @Rn        @rn        ( rn -- )   \ register# is on stack, mode# is set to 5 
+\ 6.  @Rn+       @rn+       ( rn -- )   \ register# is on stack, mode# is set to 6 
+\ 7.  #n         n #n       ( n -- )    \ constant is on stack, mode# is set to 7 
 \ All seven are aplicable to source, 1..4 to destination only.
 
 
@@ -196,7 +196,17 @@ $33 value mode#
 \ 7.   Immediate mode          n n#    Make mode modifier.
 \ Function: Constant n is on stack, mode# is set to 7. 
 
-  ' m7 alias #N ( n -- n )
+  ' m7 alias #N ( n -- n ) 
+
+\      Lets make constant words to use constant gererators CG1 or CG2. 
+\ Function: CG1 or CG2 on stack, set As bits in mode. 
+
+: 0#    ( -- 3 ) 3 00As m1 ; 
+: 1#    ( -- 3 ) 3 01As m1 ; 
+: 2#    ( -- 3 ) 3 10As m1 ; 
+: 4#    ( -- 2 ) 2 10As m1 ; 
+: 8#    ( -- 2 ) 2 11As m1 ; 
+: F#    ( -- 3 ) 3 11As m1 ; 
 
 
 
@@ -204,9 +214,9 @@ $33 value mode#
 
 \ *** Double-Operand Instructions (Format I)
 
-: smode# ( -- n )  mode# 4 rshift $F and ;
+: smode# ( -- n )  mode# 4 rshift ;
 : smodeI ( src | x src -- )
-    smode#
+    smode# mode or  $F and 
     dup 1 = if drop sRn     exit then
     dup 2 = if drop sx(Rn)  exit then
     dup 3 = if drop sADDR   exit then
@@ -214,6 +224,7 @@ $33 value mode#
     dup 5 = if drop s@Rn    exit then
     dup 6 = if drop s@Rn+   exit then
     dup 7 = if drop s#K     exit then
+
     1 throw ;
 : dmode# ( -- n )  mode# $F and ;
 : dmodeI ( dst | x dst -- )

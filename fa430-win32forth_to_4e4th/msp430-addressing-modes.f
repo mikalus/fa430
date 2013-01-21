@@ -1,8 +1,9 @@
 \ MSP430
-\ *** Addressing modes
+\ *** Addressing modes 
 
-\ Adressing modes patch opcode befor opcode is compiled.
-\ They patch the As or Ad bits and source and/or register bits.
+\ Adressing modes patch opcode befor opcode is compiled. 
+\ They set the As and Ad bits. 
+\ And set source and register bits. 
 
 : >sreg ( rn -- ) %1111 and 8 lshift mode or   to mode ;
 : >dreg ( rn -- ) %1111 and          mode or   to mode ;
@@ -65,9 +66,9 @@
 : s@Rn+  ( rn -- ) >sreg reset-src   11As  ;
 :  @Rn+  ( rn -- ) >dreg reset-src   11As  ;
 
-\ %11 = Immediate mode #K - As bits only. See constant generator too
+\ %11 = Immediate mode #K - As bits only. See constant generator. 
 \ (It is called #K instead of #N because #N is used in syntax layer later on.)
-\ The word following the instruction contains the immediate constant N.
+\ The word following the instruction contains the immediate constant K.
 \ Indirect autoincrement mode @PC+ is used.
 : s#K   ( k -- ) ( PC) 0 >sreg  to src set-src   11As ;
 :  #K   ( k -- ) ( PC) 0 >dreg  to src set-src   11As ;
@@ -87,15 +88,15 @@
   R3  11 0FFFFh 1, word processing
 
   To take advantage of constant gererators CG1 or CG2 use constant words.
-  e.g.:  2## 5 dRn mov,   ( instead of 2 s#N 5 dRn mov,  )
+  e.g.:  #s2 5 dRn mov,   ( instead of 2 s#N 5 dRn mov,  )
 [then]
 
-: 0##    ( -- ) 3 >sreg  reset-src  00As ;
-: 1##    ( -- ) 3 >sreg  reset-src  01As ;
-: 2##    ( -- ) 3 >sreg  reset-src  10As ;
-: 4##    ( -- ) 2 >sreg  reset-src  10As ;
-: 8##    ( -- ) 2 >sreg  reset-src  11As ;
-: ffff## ( -- ) 3 >sreg  reset-src  11As ;
+: s#0    ( -- ) 3 >sreg  reset-src  00As ;
+: s#1    ( -- ) 3 >sreg  reset-src  01As ;
+: s#2    ( -- ) 3 >sreg  reset-src  10As ;
+: s#4    ( -- ) 2 >sreg  reset-src  10As ;
+: s#8    ( -- ) 2 >sreg  reset-src  11As ;
+: s#FFFF ( -- ) 3 >sreg  reset-src  11As ;
 
 
 \ -- Four addressing modes for the destination operand
