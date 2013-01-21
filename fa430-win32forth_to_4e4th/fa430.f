@@ -39,25 +39,25 @@
 
 vocabulary msp430assembler   msp430assembler definitions
 
-include msp430-crosscompiler.f     \ cr .( .s) .s
-include msp430-addressing-modes.f  \ cr .( .s) .s
+include msp430-crosscompiler.f      \ cr .( a .s) .s
+include msp430-addressing-modes.f   \ cr .( b .s) .s
 
 \ See: MSP User Manual Table 3-17, Instruction Set
 
 : .W ( op -- op.W ) %1111111110111111 and ;
 : .B ( op -- op.B ) %0000000001000000 or  ;
 
-include msp430-formatI-instructions.f     \ cr .( .s) .s´
-include msp430-formatII-instructions.f    \ cr .( .s) .s
-include msp430-formatIII-instructions.f   \ cr .( .s) .s
-include syntaxlayer.f                     \ cr .( .s) .s
-\ include emuset.f                          \ cr .( .s) .s
-include msp430-cross-assembler-labels.f   \ cr .( .s) .s
-include msp430-opcode-verification.f     \ cr .( .s) .s
+include msp430-formatI-instructions.f      \ cr .( .s) .s
+include msp430-formatII-instructions.f     \ cr .( .s) .s
+include msp430-formatIII-instructions.f    \ cr .( .s) .s
+include syntaxlayer.f                      \ cr .( .s) .s
+include emuset.f                           \ cr .( .s) .s
+include msp430-cross-assembler-labels.f    \ cr .( .s) .s
+include msp430-opcode-verification.f       \ cr .( .s) .s
 
 \ HERE  SWAP -  .( \ Length of MSP430-Assembler: ) . .( Bytes ) CR
 hex \  .( -- words so far: ) words cr  .( -- end of wordlist) cr cr
-: vv   cr there u. loca x_@ .s  cr tstart 20 dump   checki ; 
-: ..   bye ; 
+: vv   cr there u. loca x_@ .s  cr tstart 20 dump   checki ;
+: ..   bye ;
 ( finis)
 
