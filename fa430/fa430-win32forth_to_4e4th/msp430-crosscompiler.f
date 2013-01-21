@@ -11,7 +11,7 @@
 variable tdp     : there  tdp @ ;
 
 there value loca  \ last opcode address. ( .lst .chk   gesetzt mit [op] )
-: setloca  ( -- )    there to loca ; 
+: setloca  ( -- )    there to loca ;
 
 
 create         tstart $3F00 allot  here constant tend    \ 16Kbyte
@@ -38,14 +38,14 @@ defer [op]
 :  X_.  { w -- }        w $00FF and 8 lshift  w $FF00 and 8 rshift or hex. ;
 
 : MSP430CODE  ( <name> -- )
-  tclear   bl word count  cr cr ." MSP430CODE "  2dup upper type cr ;
+  tclear   bl word count cr ." MSP430CODE "  2dup upper type cr ;
 
 : ?CR ( i -- ) $0F and 0= if cr then ;
 : END-CODE    ( --- )
   base @ >r  hex
   there  tstart  ?do   i x_@ u.   ." i, "  i ?CR  2 +LOOP
   cr ." END-CODE "
-  r> base !  cr cr ;
+  r> base ! cr ;
 
 \ assemble
 
