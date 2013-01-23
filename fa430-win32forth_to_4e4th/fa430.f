@@ -35,7 +35,7 @@
 
 \ : --- bye ;
 \ : %% 2 base ! ;
-\  HERE .( here) .s
+HERE \ use this to calculate byts used for assembler definitions.
 
 vocabulary msp430assembler   msp430assembler definitions
 
@@ -53,11 +53,11 @@ include msp430-formatIII-instructions.f    \ cr .( .s) .s
 include syntaxlayer.f                      \ cr .( .s) .s
 include emuset.f                           \ cr .( .s) .s
 include msp430-cross-assembler-labels.f    \ cr .( .s) .s
-include msp430-opcode-verification.f       \ cr .( .s) .s
+\ include msp430-opcode-verification.f       \ cr .( .s) .s
 
-\ HERE  SWAP -  .( \ Length of MSP430-Assembler: ) . .( Bytes ) CR
+HERE  SWAP -  cr . .( bytes used for this assembler ) CR
 hex \  .( -- words so far: ) words cr  .( -- end of wordlist) cr cr
-: vv   cr there u. loca x_@ .s  cr tstart 20 dump   checki ;
+
 : ..   bye ;
 ( finis)
 
