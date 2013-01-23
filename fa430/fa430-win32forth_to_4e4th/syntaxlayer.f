@@ -37,8 +37,6 @@
 
 \ *** Here we go:  Definig 7 modes.
 
-$33 value mode#
-: reset-mode#  $33 to mode#  ;
 
 \ shift in modes: upper nible=src, lower nibble= dest
 : accumulate-mode  ( n -- ) mode# 4 lshift +  to mode# ;
@@ -52,6 +50,8 @@ $33 value mode#
 : m6 ( -- )       6 accumulate-mode ; \ @Rn+
 : m7 ( -- )       7 accumulate-mode ; \ #N
 \ All seven are aplicable to source, 1..4 to destination only.
+
+: m8 ( -- )       8 accumulate-mode ; \ handle constant generator
 
 
 
@@ -198,15 +198,17 @@ $33 value mode#
 
   ' m7 alias #N ( n -- n )
 
-\      Lets make constant words to use constant gererators CG1 or CG2.
-\ Function: CG1 or CG2 on stack, set As bits in mode.
 
-: 0#    ( -- 3 ) 3 00As m1 ;
-: 1#    ( -- 3 ) 3 01As m1 ;
-: 2#    ( -- 3 ) 3 10As m1 ;
-: 4#    ( -- 2 ) 2 10As m1 ;
-: 8#    ( -- 2 ) 2 11As m1 ;
-: FFFF#    ( -- 3 ) 3 11As m1 ;
+
+\ 8.     Lets make constant words to use constant gererators CG1 or CG2.
+\ Function: Executin token on stack, set register# and As bits in mode.
+
+: 0#     ( -- xt ) ['] s#0    m8 ;
+: 1#     ( -- xt ) ['] s#1    m8 ;
+: 2#     ( -- xt ) ['] s#2    m8 ;
+: 4#     ( -- xt ) ['] s#4    m8 ;
+: 8#     ( -- xt ) ['] s#8    m8 ;
+: FFFF#  ( -- xt ) ['] s#FFFF m8 ;
 
 
 
@@ -215,6 +217,7 @@ $33 value mode#
 \ *** Double-Operand Instructions (Format I)
 
 : smode# ( -- n )  mode# 4 rshift $F and ;
+
 : smodeI ( src | x src -- )
     smode#
     dup 1 = if drop sRn     exit then
@@ -224,8 +227,9 @@ $33 value mode#
     dup 5 = if drop s@Rn    exit then
     dup 6 = if drop s@Rn+   exit then
     dup 7 = if drop s#K     exit then
-
+    dup 8 = if drop execute exit then
     1 throw ;
+
 : dmode# ( -- n )  mode# $F and ;
 : dmodeI ( dst | x dst -- )
     dmode#
