@@ -1,4 +1,4 @@
-\ FORTH Assembler for TI MSP430x2xx Family
+\ FORTH Assembler for TI MSP430x2xx Family 
 
 \ Simple Assembler for Texas Instruments MSP430 Microcomputers
 \ made with gforth 0-7-0 on MacOSX 10.4.11 PowerPC G4.
