@@ -1,9 +1,9 @@
 \ MSP430
-\ *** Addressing modes 
+\ *** Addressing modes
 
-\ Adressing modes patch opcode befor opcode is compiled. 
-\ They set the As and Ad bits. 
-\ And set source and register bits. 
+\ Adressing modes patch opcode befor opcode is compiled.
+\ They set the As and Ad bits.
+\ And set source and register bits.
 
 : >sreg ( rn -- ) %1111 and 8 lshift mode or   to mode ;
 : >dreg ( rn -- ) %1111 and          mode or   to mode ;
@@ -27,6 +27,8 @@
 :  0Ad ( -- )   mode %1111111101111111 and   to mode ;
 :  1Ad ( -- )   mode %0000000010000000 or    to mode ;
 
+: .W ( op -- op.W ) %1111111110111111 and ;
+: .B ( op -- op.B ) %0000000001000000 or  ;
 
 
 \ -- Seven addressing modes for the source operand.
@@ -66,7 +68,7 @@
 : s@Rn+  ( rn -- ) >sreg reset-src   11As  ;
 :  @Rn+  ( rn -- ) >dreg reset-src   11As  ;
 
-\ %11 = Immediate mode #K - As bits only. See constant generator. 
+\ %11 = Immediate mode #K - As bits only. See constant generator.
 \ (It is called #K instead of #N because #N is used in syntax layer later on.)
 \ The word following the instruction contains the immediate constant K.
 \ Indirect autoincrement mode @PC+ is used.
