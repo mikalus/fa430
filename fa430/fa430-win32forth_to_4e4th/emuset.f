@@ -1,12 +1,11 @@
 \ Emulated MSP430 instruction set
 
 
-
 \ ADC Emulation : ADDC #0,dst
 : ADC         \ Add C to destination:   dst + C --> dst [ * * * * ]
-    0# swap  ADDC   ;
+    0# ds-swap  ADDC   ;
 : ADC.B       \ Add C to destination:   dst + C --> dst [ * * * * ]
-    0# swap  ADDC.B ;
+    0# ds-swap  ADDC.B ;
 
 
 
@@ -18,9 +17,9 @@
 
 \ CLR Emulation: MOV #0,dst
 : CLR         \ Clear destination:  0 --> dst [ - - - - ]
-    0# swap  MOV  ;
+    0# ds-swap  MOV  ;
 : CLR.B       \ Clear destination:  0 --> dst [ - - - - ]
-    0# swap  MOV.B   ;
+    0# ds-swap  MOV.B   ;
 
 
 
@@ -44,31 +43,31 @@
 
 \ DADC Emulation: DADD #0,dst
 : DADC        \ Add C decimally to destination:   dst + C --> dst   (decimally) [ * * * * ]
-    0# swap  DADD   ;
+    0# ds-swap  DADD   ;
 : DADC.B      \ Add C decimally to destination:   dst + C --> dst   (decimally) [ * * * * ]
-    0# swap  DADD.B   ;
+    0# ds-swap  DADD.B   ;
 
 
 
 \ DEC Emulation: SUB #1,dst
 : DEC         \ Decrement destination:  dst   - 1 --> dst [ * * * * ]
-    1# swap SUB   ;
+    1# ds-swap SUB   ;
 : DEC.B       \ Decrement destination:  dst   - 1 --> dst [ * * * * ]
-    1# swap SUB.B   ;
+    1# ds-swap SUB.B   ;
 
 
 
 \ DECD Emulation: SUB #2,dst
 : DECD        \ Double-decrement destination:  dst   - 2 --> dst [ * * * * ]
-    2# swap  SUB   ;
+    2# ds-swap  SUB   ;
 : DECD.B      \ Double-decrement destination:  dst   - 2 --> dst [ * * * * ]
-    2# swap  SUB.B   ;
+    2# ds-swap  SUB.B   ;
 
 
 
 \ DINT Emulation: BIC #8,SR
 : DINT         \  Disable interrupts:  0 --> GIE [ - - - - ]
-    8# SR  BIC, ;
+    8# SR  BIC ;
 
 
 
@@ -80,25 +79,25 @@
 
 \ INC Emulation: ADD #1,dst
 : INC         \ Increment destination:  dst +1 --> dst [ * * * * ]
-    1# swap  ADD   ;
+    1# ds-swap  ADD   ;
 : INC.B        \ Increment destination:  dst +1 --> dst [ * * * * ]
-    1# swap  ADD.B   ;
+    1# ds-swap  ADD.B   ;
 
 
 
 \ INCD Emulation: ADD #2,dst
 : INCD        \ Double-increment destination:  dst+2 --> dst [ * * * * ]
-    2# swap  ADD   ;
+    2# ds-swap  ADD   ;
 : INCD.B,     \ Double-increment destination:  dst+2 --> dst [ * * * * ]
-    2# swap  ADD.B  ;
+    2# ds-swap  ADD.B  ;
 
 
 
 \ INV Emulation: XOR #0FFFFh,dst
 : INV         \ Invert destination:  .not.dst --> dst [ * * * * ]
-    FFFF# swap  XOR.W   ;
+    FFFF# ds-swap  XOR.W   ;
 : INV.B       \ Invert destination:  .not.dst --> dst [ * * * * ]
-    FFFF# swap  XOR.B   ;
+    FFFF# ds-swap  XOR.B   ;
 
 
 
@@ -110,9 +109,9 @@
 
 \ POP Emulation: MOV @SP+,dst
 : POP         \ Pop item from stack to destination:   @SP --> dst, SP+2 --> SP [ - - - - ]
-     @SP+ swap  MOV   ;
+     @SP+ ds-swap  MOV   ;
 : POP.B       \ Pop item from stack to destination:   @SP --> dst, SP+2 --> SP [ - - - - ]
-     @SP+ swap  MOV.B ;
+     @SP+ ds-swap  MOV.B ;
 
 
 \ RET Emulation: MOV @SP+,PC
@@ -139,9 +138,9 @@
 
 \ SBC Emulation: SUBC #0,dst
 : SBC         \ Subtract not(C) from destination:  dst + 0FFFFh + C --> dst [ * * * * ]
-    0# swap  SUBC   ;
+    0# ds-swap  SUBC   ;
 : SBC.B       \ Subtract not(C) from destination:  dst + 0FFFFh + C --> dst [ * * * * ]
-    0# swap  SUBC,  ;
+    0# ds-swap  SUBC,  ;
 
 
 
@@ -165,9 +164,9 @@
 
 \ TST Emulation: CMP #0,dst
 : TST        \ Test destination:  dst + 0FFFFh + 1 [ 0 * * 1 ]
-    0# swap  CMP   ;
+    0# ds-swap  CMP   ;
 : TST.B       \ Test destination:  dst + 0FFFFh + 1 [ 0 * * 1 ]
-    0# swap  CMP.B   ;
+    0# ds-swap  CMP.B   ;
 
 
 \ 4e4th macro
