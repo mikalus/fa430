@@ -40,6 +40,11 @@
 
 \ shift in modes: upper nible=src, lower nibble= dest
 : accumulate-mode  ( n -- ) mode# 4 lshift +  to mode# ;
+: ds-swap \ swap stack and accumulated mode too.
+  swap  ( dRn sRn -- sRn dRn )
+  mode# $F and   mode# 4 rshift $F and  ( -- dm sm )
+  swap reset-mode# accumulate-mode accumulate-mode ;
+
 
 \ Seven addressing modes.
 : m1 ( -- )       1 accumulate-mode ; \ Rn
@@ -165,7 +170,7 @@
 
 
 \ 6.   Indirect autoincrement  @rn+       Make a name for each register.
-\ Function: Put register# on stack, set mode# to 1.
+\ Function: Put register# on stack, set mode# to 6.
 
 : @R0+ 0 m6 ;     ' @R0+ alias @PC+  \ program counter
 : @R1+ 1 m6 ;     ' @R1+ alias @SP+  \ stack ponter
@@ -237,7 +242,7 @@
     dup 2 = if drop dx(Rn)  exit then
     dup 3 = if drop dADDR   exit then
     dup 4 = if drop d&ADDR  exit then
-    1 throw ;
+    1 throw ;   \ error(1) address mode in destination > 4
 
 \ expression ex may be single or doubble item. res
  : MOV.W  ( ex1 ex2  -- ) dmodeI smodeI     mov.w,  reset-mode# ;
