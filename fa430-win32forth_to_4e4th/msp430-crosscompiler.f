@@ -72,8 +72,13 @@ true [if]  ' setloca is [op]  [else]  ' nop is [op]  [then]  \ switch compiling 
 : NEWCODE ( -- )
   reset-mode# reset-mode reset-src reset-dst tclear ;
 
-: MSP430CODE  ( <name> -- )
-  newcode   cr ." HEX "   bl word count cr ." MSP430CODE "  2dup upper type cr ;
+: CODE  ( <name> -- )
+  \ at runtime <name> executes code.
+  newcode   cr ." HEX "   bl word count cr ." CODE "  2dup upper type cr ;
+
+: CODEADR  ( <name> -- )
+\ at runtime: ( -- adr ) address where code starts.
+  newcode   cr ." HEX "   bl word count cr ." CODEADR "  2dup upper type cr ;
 
 : ?CR ( i -- ) $0F and 0= if cr then ;
 : END-CODE    ( --- )
