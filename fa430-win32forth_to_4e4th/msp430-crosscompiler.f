@@ -87,4 +87,4 @@ true [if]  ' setloca is [op]  [else]  ' nop is [op]  [then]  \ switch compiling 
   cr ." END-CODE "
   r> base ! cr ;
 
-( finis)
+( finis )
